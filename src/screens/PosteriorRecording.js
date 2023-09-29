@@ -12,11 +12,12 @@ import { Audio } from "expo-av";
 import { AddPatientContext, lungsPosterior } from "../context/AddPatientContext";
 import { AuthContext } from "../context/AuthContext";
 import LungXinstance from "../api/server";
-import { FontAwesome } from '@expo/vector-icons'; 
+import { FontAwesome } from '@expo/vector-icons';
 import ProgressStep from "../components/Molecules/ProgressStep";
 
 
-export default function PosteriorRecording({ navigation }) {
+export default function PosteriorRecording({ navigation, route }) {
+  const EditPosteriorRecTag = route?.params?.EditPosteriorRecTag
   const orientations = ["vertical", "horizontal"];
   const [currrentStep, setCurrentStep] = useState(1);
   const recordingRef = useRef();
@@ -32,11 +33,12 @@ export default function PosteriorRecording({ navigation }) {
   const [portionOnFocus, setPortionOnFocus] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const { recordingsPosterior, setRecordingsPosterior } = useContext(AddPatientContext)
+  const [recordingTime, setRecordingTime] = useState(10);
 
   const { newlyCreatedPatientId, newlyCreatedPatientLungsId, handleAnteriorPositionTagging } = useContext(AddPatientContext)
   const { user } = useContext(AuthContext);
 
- 
+
 
   async function convert_Url_Blob_File(url) {
     let blob = await fetch(url).then(res => res.blob())
@@ -61,16 +63,22 @@ export default function PosteriorRecording({ navigation }) {
         payload.append("doctor", user?.id)
         payload.append("id", newlyCreatedPatientLungsId)
 
+        
         try {
           setTimeout(async () => {
-            // console.log("recordingsPosterior.....",payload)
             const res = await LungXinstance.patch("/api/lung_audio/", payload, {
               headers: {
                 'content-type': 'multipart/form-data'
               }
             })
-            navigation.navigate("Anterior Tagging");
 
+            if (EditPosteriorRecTag == "Edit Posterior Rec Tag") {
+              navigation.push("Posterior Tagging", {
+                EditPosteriorRecTag: EditPosteriorRecTag
+              })
+            } else {
+              navigation.navigate("Anterior Tagging");
+            }
           }, 2000)
 
         } catch (error) {
@@ -99,11 +107,11 @@ export default function PosteriorRecording({ navigation }) {
       } else {
         console.log('No sound found.')
       }
-      
+
       sound.setOnPlaybackStatusUpdate((status) => {
         if (status.didJustFinish) {
           sound.stopAsync();
-          setCurrentSoundId(null); 
+          setCurrentSoundId(null);
           setIsPlaying(false)
         }
       });
@@ -176,6 +184,9 @@ export default function PosteriorRecording({ navigation }) {
           const { recording } = await Audio.Recording.createAsync(
             Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
           );
+          const timerInterval = setInterval(() => {
+            setRecordingTime((prevTime) => prevTime -1);
+          }, 1000);
           // set Portion On Focus for the display of true  re-recording section
           setPortionOnFocus(id)
           setIsRecording(true)
@@ -190,6 +201,15 @@ export default function PosteriorRecording({ navigation }) {
           }
           setRecordingTimeout(
             setTimeout(() => {
+              ToastAndroid.showWithGravityAndOffset(
+                'Recording Completed',
+                ToastAndroid.SHORT,
+                ToastAndroid.BOTTOM,
+                25,
+                50
+              );
+              clearInterval(timerInterval);
+              setRecordingTime(10)
               setIsRecording(false)
               stopRecording(id);
               if (reRec != 're-record') {
@@ -267,7 +287,10 @@ export default function PosteriorRecording({ navigation }) {
                   onPress={() => !isRecording ? startRecording(recordingLine.id, count, setCount) : (() => { setIsRecording(false); stopRecording(recordingLine.id) })()}
                 >
                   {/* {btnState[index+7] && <Image style={styles.backimg} source={testdel}/>}  */}
-                  {portionOnFocus == index + 7 && <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.13 }} source={testdel} />}
+                  {portionOnFocus == index + 7 &&
+                    <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }} />
+                    // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
+                  }
 
                   {count === 0 ?
                     <></>
@@ -279,7 +302,7 @@ export default function PosteriorRecording({ navigation }) {
                             <View style={styles.innerCircle}>
                             </View>
                           </View>
-                          <Text style={styles.recordingText}>Rec</Text>
+                          <Text style={styles.recordingText}>{formatTime(recordingTime)}</Text>
                         </View>
                       }
                     </>}
@@ -289,7 +312,10 @@ export default function PosteriorRecording({ navigation }) {
               :
               <>
                 <Pressable disabled={isRecording} onPress={() => toggleSound(recordingLine.id)} style={[recordingLine.style, styles.button_wrapper]} key={(() => Math.random())()}>
-                  {portionOnFocus == index + 7 && <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.13 }} source={testdel} />}
+                  {portionOnFocus == index + 7 &&
+                    <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }} />
+                    // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
+                  }
 
                   {btnState[index + 7] && portionOnFocus == index + 7 && isRecording ?
                     <View style={styles.state}>
@@ -297,7 +323,7 @@ export default function PosteriorRecording({ navigation }) {
                         <View style={styles.innerCircle}>
                         </View>
                       </View>
-                      <Text style={styles.recordingText}>Re-rec</Text>
+                      <Text style={styles.recordingText}>{formatTime(recordingTime)}</Text>
                     </View>
                     :
                     <View
@@ -320,11 +346,17 @@ export default function PosteriorRecording({ navigation }) {
     });
   }
 
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+};
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
 
-      <View style={{ height: 80, width: metrics.screenWidth,}}>       
-        <ProgressStep  currrentStep={currrentStep} setCurrentStep={setCurrentStep}/>
+      <View style={{ height: 80, width: metrics.screenWidth, }}>
+        <ProgressStep currrentStep={currrentStep} setCurrentStep={setCurrentStep} />
       </View>
 
 
@@ -332,7 +364,7 @@ export default function PosteriorRecording({ navigation }) {
         <Text style={rereording.recordingPosition}>Position : {portionOnFocus}</Text>
         <Pressable style={rereording.reRecording} disabled={isRecording || !portionOnFocus || isPlaying || !btnState[portionOnFocus]} onPress={() => startRecording(portionOnFocus, 1, '', 're-record')}>
           <Text style={(isRecording || !portionOnFocus || isPlaying || !btnState[portionOnFocus]) ? rereording.reRecordingActive : rereording.reRecordingText}>
-          <FontAwesome name="rotate-left" /> Re-record
+            <FontAwesome name="rotate-left" /> Re-record
           </Text>
         </Pressable>
       </View>
@@ -351,43 +383,45 @@ export default function PosteriorRecording({ navigation }) {
         />
       </View>
 
-
-      <View
-        style={{
-          marginBottom: 30,
-          flexDirection:'row',
-          justifyContent: 'space-between',
-          flex: 1,
-          marginTop: 20,
-          width:"94%",
-        }}
-      >
-        <View style={{ width: metrics.screenWidth * 0.4 ,left:5}}>
-          <button.BtnContain
-            label="Anterior"
-            color="#F6FBF9"
-            labelsize={12}
-            labelColor={colors.green}
-            iconLeft={"arrow-left"}
-            onPress={() => {
-              navigation.goBack();
-            }}
-          />
+        <View
+          style={{
+            marginBottom: 30,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            flex: 1,
+            marginTop: 20,
+            width: "94%",
+          }}
+        >
+          <View style={{ width: metrics.screenWidth * 0.4, left: 5 }}>
+          {EditPosteriorRecTag ?
+          <></>:
+            <button.BtnContain
+              label="Anterior"
+              color="#F6FBF9"
+              labelsize={12}
+              labelColor={colors.green}
+              iconLeft={"arrow-left"}
+              onPress={() => {
+                navigation.goBack();
+              }}
+            />
+          }
+          </View>
+          <View style={{ width: metrics.screenWidth * 0.49 }}>
+            <button.BtnContain
+              label={EditPosteriorRecTag ?"Posterior Tagging":"Continue"}
+              color="#F6FBF9"
+              labelsize={12}
+              labelColor={colors.green}
+              icon={"arrow-right"}
+              onPress={() => {
+                //   handlePatientDetailSubmission();
+                handlePatientPosteriorRecordings()
+              }}
+            />
+          </View>
         </View>
-        <View style={{ width: metrics.screenWidth * 0.4 }}>
-          <button.BtnContain
-            label="Continue"
-            color="#F6FBF9"
-            labelsize={12}
-            labelColor={colors.green}
-            icon={"arrow-right"}
-            onPress={() => {
-              //   handlePatientDetailSubmission();
-              handlePatientPosteriorRecordings()
-            }}
-          />
-        </View>
-      </View>
     </ScrollView>
   );
 }

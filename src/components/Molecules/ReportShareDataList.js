@@ -13,29 +13,7 @@ const ReportShareDataList = ({
     onPress,
 }) => {
 
-    // const [patientCode, setPatientCode] = useState("")
-
-    // const handlePatientData = async () => {
-    //     try {
-    //         const payload = {
-    //             id: item?.patient_health?.[0]?.id,
-    //             doctor_id: item?.doctor
-    //         }
-    //         const res = await LungXinstance.post("/api/patients/", payload, {
-    //             headers: {
-    //                 "Content-Type": "multipart/form-data"
-    //             }
-    //         })
-    //         setPatientCode(res?.data?.[0].patient_code)
-    //     } catch (e) {
-    //         console.log("Error in ReportShareDataList ", e)
-    //     }
-    // }
-
-    // useEffect(() => {
-    //     handlePatientData()
-    // }, [])
-
+    
     return (
         <View style={styles.PatientDetailsContainer}>
             <TouchableOpacity onPress={onPress}>

@@ -44,6 +44,7 @@ export default function AnteriorRecording({ route, navigation }) {
   const [loading, setloading] = useState(false);
 
   const payload = new FormData()
+  const [recordingTime, setRecordingTime] = useState(10);
 
 
   async function handlePatientAnteriorRecordings() {
@@ -67,7 +68,8 @@ export default function AnteriorRecording({ route, navigation }) {
               payload.append("patient", newlyCreatedPatientId)
               payload.append("doctor", user?.id)
               sessionNo && payload.append("session", "session " + sessionNo)
-
+              
+              
               const res = await LungXinstance.put("/api/lung_audio/", payload, {
                 headers: {
                   'content-type': 'multipart/form-data'
@@ -79,7 +81,8 @@ export default function AnteriorRecording({ route, navigation }) {
               payload.append("doctor_id", user?.id)
               payload.append("id", newlyCreatedPatientLungsId)
               sessionNo && payload.append("session", "session " + sessionNo)
-              // console.log("lung_audio.....else", payload)
+             
+             
               try {
                 LungXinstance.patch("/api/lung_audio/", payload, {
                   headers: {
@@ -93,7 +96,7 @@ export default function AnteriorRecording({ route, navigation }) {
             }
             if (EditAnteriorRecTag == "Edit Anterior Rec Tag") {
               navigation.push("Anterior Tagging", {
-                EditAnteriorRecTag : EditAnteriorRecTag
+                EditAnteriorRecTag: EditAnteriorRecTag
               })
             } else {
               navigation.navigate("Posterior Recording");
@@ -201,6 +204,9 @@ export default function AnteriorRecording({ route, navigation }) {
           const { recording } = await Audio.Recording.createAsync(
             Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
           );
+          const timerInterval = setInterval(() => {
+            setRecordingTime((prevTime) => prevTime -1);
+          }, 1000);
           // set Portion On Focus for the display of true  re-recording section
           setPortionOnFocus(id)
           setIsFoucued(true)
@@ -217,8 +223,18 @@ export default function AnteriorRecording({ route, navigation }) {
           //using stopRecording function saving it to the recordings state
           setRecordingTimeout(
             setTimeout(() => {
+              ToastAndroid.showWithGravityAndOffset(
+                'Recording Completed',
+                ToastAndroid.SHORT,
+                ToastAndroid.BOTTOM,
+                25,
+                50
+              );
+              clearInterval(timerInterval);
+              setRecordingTime(10)
               setIsRecording(false)
               stopRecording(id);
+
               if (reRec != 're-record') {
                 setCount(0)
               }
@@ -295,7 +311,10 @@ export default function AnteriorRecording({ route, navigation }) {
                   onPress={() => !isRecording ? startRecording(recordingLine.id, count, setCount) : (() => { setIsRecording(false); stopRecording(recordingLine.id) })()}
                 >
                   {/* {btnState[index] && <Image style={{...styles.backimg,}} source={testdel}/>}  */}
-                  {portionOnFocus == index && <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.13 }} source={testdel} />}
+                  {portionOnFocus == index && 
+                  <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }}/>
+                  // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
+                  }
 
                   {count === 0 ?
                     <></>
@@ -307,7 +326,7 @@ export default function AnteriorRecording({ route, navigation }) {
                             <View style={styles.innerCircle}>
                             </View>
                           </View>
-                          <Text style={styles.recordingText}>Rec</Text>
+                          <Text style={styles.recordingText}>{formatTime(recordingTime)}</Text>
                         </View>}
                     </>
                   }
@@ -317,7 +336,10 @@ export default function AnteriorRecording({ route, navigation }) {
               :
               <>
                 <Pressable disabled={isRecording} onPress={() => toggleSound(index)} style={[recordingLine.style, styles.button_wrapper]} key={(() => Math.random())()}>
-                  {portionOnFocus == index && <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.13 }} source={testdel} />}
+                  {portionOnFocus == index && 
+                  <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }}/>
+                  // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
+                  }
 
                   {btnState[index] && portionOnFocus == index && isRecording ?
                     <View style={styles.state}>
@@ -325,7 +347,7 @@ export default function AnteriorRecording({ route, navigation }) {
                         <View style={styles.innerCircle}>
                         </View>
                       </View>
-                      <Text style={styles.recordingText}>Re-rec</Text>
+                      <Text style={styles.recordingText}>{formatTime(recordingTime)}</Text>
                     </View>
                     :
                     <View
@@ -344,21 +366,23 @@ export default function AnteriorRecording({ route, navigation }) {
     });
   }
 
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+};
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {
         loading ? <LoadingScreen /> : null
       }
+
+
       <View style={{ height: 80, width: metrics.screenWidth, }}>
         <ProgressStep currrentStep={currrentStep} setCurrentStep={setCurrentStep} />
       </View>
-
-      {/* <Text>{isRecording+""}</Text> */}
-      {/* <Text>{portionOnFocus}</Text> */}
-      {/* <Text>{isPlaying+""}</Text> */}
-      {/* <Text>{!btnState[portionOnFocus]+""}</Text> */}
-
 
       <View style={rereording.recordingWrapper}>
         <Text style={rereording.recordingPosition}>Position : {portionOnFocus}</Text>
@@ -390,9 +414,9 @@ export default function AnteriorRecording({ route, navigation }) {
           width: "94%",
         }}
       >
-        <View style={{ width: metrics.screenWidth * 0.46, }}>
+        <View style={{ width: metrics.screenWidth * 0.48, }}>
           <button.BtnContain
-            label={EditAnteriorRecTag?"Anterior Tagging":"Posterior"}
+            label={EditAnteriorRecTag ? "Anterior Tagging" : "Posterior"}
             color="#F6FBF9"
             labelsize={12}
             labelColor={colors.green}
@@ -487,7 +511,13 @@ const styles = StyleSheet.create({
     paddingLeft: 6,
     paddingBottom: 1,
     fontWeight: 600
-  }
+  },
+  containerTimer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "transparent",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
 
 const rereording = StyleSheet.create({
@@ -520,7 +550,8 @@ const rereording = StyleSheet.create({
     fontSize: 18,
     color: "red"
 
-  }
+  },
+  
 })
 
 

@@ -174,6 +174,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 12,
     backgroundColor: colors.darkgray,
+    elevation:0.5
   },
   Wrapper: {
     flexDirection: 'row',

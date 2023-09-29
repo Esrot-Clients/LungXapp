@@ -17,7 +17,6 @@ export default function AnnotationScreen({ navigation }) {
   const { user } = useContext(AuthContext);
   const isFocused = useIsFocused()
 
-
   useEffect(() => {
     navigation.setOptions({
       headerTitle: 'Reports',
@@ -46,12 +45,15 @@ export default function AnnotationScreen({ navigation }) {
     }, [navigation]);
   })
 
-  const [repotsList, setReportsList,] = useState([])
+  const [repotsList, setReportsList] = useState([])
+  const [repotsListFilter, setReportsListFilter] = useState([])
+  const [reverse, setReverse] = useState(false);
 
   const handleData = async () => {
     try {
       const res = await LungXinstance.get("/api/view-shared-data/")
       setReportsList(res.data)
+      setReportsListFilter(res.data)
     } catch (e) {
       console.log("Error...getData in report annotation", e)
     }
@@ -72,14 +74,30 @@ export default function AnnotationScreen({ navigation }) {
   }
   }
 
+  const handleFiltering = async search => {
+    var temp = repotsListFilter.filter(item => {
+      return (
+        item?.patient?.patient_code.toLowerCase().includes(search.toLowerCase()) ||
+        item?.patient?.patient_code.toLowerCase().includes(search.toLowerCase())
+      );
+    });
+    setReportsList(temp);
+  };
+
+  const handleDateFilter = () => {
+    const newData = reverse ? repotsListFilter.slice().reverse() : repotsListFilter.slice();
+    setReportsList(newData);
+    setReverse(!reverse);
+  };
+
   return (
     <View style={styles.container}>
-      <SearchBar />
+      <SearchBar  handleFiltering={handleFiltering} handleDateFilter={handleDateFilter}/>
       <FlatList
         showsVerticalScrollIndicator={false}
         data={repotsList}
         renderItem={({ item }) => <ReportShareDataList item={item} onPress={() => handleMarkDataViewed(item.id)} />}
-        keyExtractor={(item) => item.toString()}
+        // keyExtractor={(item) => item.toString()}
       />
 
     </View>

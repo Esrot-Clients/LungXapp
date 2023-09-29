@@ -48,7 +48,7 @@ export default function ComplaintsCard({
                 justifyContent: "center",
               }}
             >
-              <Text style={{ fontFamily: "Montserrat-Medium", color: "#fff" }}>
+              <Text style={{ fontFamily: "Montserrat-Medium", color: "#fff",fontSize:13 }}>
                 Edit
               </Text>
             </View>

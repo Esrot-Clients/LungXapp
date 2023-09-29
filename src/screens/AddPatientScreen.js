@@ -471,7 +471,7 @@ export default function AddPatientScreen({ route, navigation }) {
 
     },
     {
-      id:4,
+      id: 4,
       lungs_tags: "p10_tag",
 
     },
@@ -494,18 +494,22 @@ export default function AddPatientScreen({ route, navigation }) {
           "Content-Type": "multipart/form-data"
         }
       })
-      setNewlyCreatedPatientLungsId(res?.data?.[0]?.id)
+     
       if (res?.data?.length > 0) {
 
-        var Data ={};
-        if(session){
+        var Data = {};
+        if (session) {
           var newDatafilter = res?.data?.filter(item => item.session === session);
           Data = newDatafilter?.[0]
-        }else{
+          var parts = session.split(" ");
+          setSessionNo(parseInt(parts[1]))
+         
+        } else {
           Data = res?.data?.[0]
-        }
-      
+        } 
 
+        setNewlyCreatedPatientLungsId(Data?.id)
+        
         recordings.forEach(async (recordingss, index) => {
           if (Data?.[recordingss.key] != null) {
             const uri = `https://lung.thedelvierypointe.com${Data?.[recordingss.key]}`
@@ -529,7 +533,7 @@ export default function AddPatientScreen({ route, navigation }) {
             AnteriorTagging.map((antag) => {
               antag?.id === recordingLine?.id &&
                 antag?.options?.map((option) => {
-                  if (option?.id === opt?.id && opt?.id != 5  ) {
+                  if (option?.id === opt?.id && opt?.id != 5 && opt?.id != 6) {
                     option.isChecked = true;
                   }
                 })
@@ -542,8 +546,8 @@ export default function AddPatientScreen({ route, navigation }) {
           Data?.[recordingLine.lungs_tags] && JSON.parse(Data?.[recordingLine?.lungs_tags])?.options?.map(opt => {
             PosteriorTagging.map((postag) => {
               postag?.id === recordingLine?.id &&
-              postag?.options?.map((option) => {
-                  if (option?.id === opt?.id && opt?.id != 5 ) {
+                postag?.options?.map((option) => {
+                  if (option?.id === opt?.id && opt?.id != 5 && opt?.id != 6) {
                     option.isChecked = true;
                   }
                 })
@@ -611,7 +615,7 @@ export default function AddPatientScreen({ route, navigation }) {
       </View>
 
       <Textinput
-        label={"Patient name"}
+        label={"Patient Name"}
         onChangeText={setpatientname}
         value={patientname}
       />
@@ -620,6 +624,7 @@ export default function AddPatientScreen({ route, navigation }) {
         label={"Patient ID"}
         onChangeText={setpatientid}
         value={patientid + ""}
+        editable={false}
       />
 
       <View
@@ -634,6 +639,7 @@ export default function AddPatientScreen({ route, navigation }) {
           label="Age"
           onChangeText={setpatientAge}
           value={patientAge}
+          keyboardType="numeric"
         />
         <PatientGenderCard />
       </View>
@@ -649,12 +655,14 @@ export default function AddPatientScreen({ route, navigation }) {
           label="Weight(kg)"
           onChangeText={setpatientWeight}
           value={patientWeight}
+          keyboardType="numeric"
         />
         <Textinput
           width={metrics.screenWidth * 0.43}
           label="Temperature(C)"
           onChangeText={setpatientTemperature}
           value={patientTemperture}
+          keyboardType="numeric"
         />
       </View>
       <View
@@ -669,12 +677,14 @@ export default function AddPatientScreen({ route, navigation }) {
           label="Oxygen saturation(SpO2)"
           onChangeText={setpatientPatientOxygenLevel}
           value={patientOxygenLevel}
+          keyboardType="numeric"
         />
         <Textinput
           width={metrics.screenWidth * 0.43}
           label="Blood Pressure(mm/hg)"
           onChangeText={setpatientBloodPressure}
           value={patientBloodPressure}
+          keyboardType="numeric" 
         />
       </View>
 
@@ -870,7 +880,7 @@ export default function AddPatientScreen({ route, navigation }) {
           </View>
         </>
       ))}
-{/* 
+      {/* 
       <View style={{ width: metrics.screenWidth * 0.9, marginVertical: 15 }}>
         <Title color={colors.black}>Diagnosis Notes </Title>
       </View>

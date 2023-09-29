@@ -169,6 +169,7 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
                     :
                     <TouchableOpacity
                       onPress={() => {
+                        resetStateObj();
                         // navigation.navigate('In Patient Details Session', { item: patientDetail?.[0], detailItem: item })
                         navigation.navigate("Add Patient", { existedPatientId: patientDetail?.[0]?.id, session: item?.session?.session, existedPatientHealthId: item?.session?.id })
                       }}>

@@ -132,7 +132,6 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
       created_at: detailItem.session?.created_at.slice(0, 10),
       session: detailItem?.session.session
     }
-    // console.log("payload....",payload)
     return LungXinstance.post(`api/patients/session/`, payload, {
       headers: {
         "Content-Type": "multipart/form-data"
