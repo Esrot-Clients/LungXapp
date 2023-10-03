@@ -223,7 +223,7 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
             {patientLungsDetail?.[0]?.[recordingLine?.lungs_audio] && <Text style={styles.play_stop} >{currentSoundId == index ? <Text style={styles.btn_text}>&#9208;</Text> : <Text style={styles.btn_text}>&#9654;</Text>}</Text>}
             {opt == "" &&
               patientLungsDetail?.[0]?.[recordingLine.lungs_tags] && JSON.parse(patientLungsDetail?.[0]?.[recordingLine?.lungs_tags])?.options?.map(res =>
-                <Text key={(() => Math.random())()} style={lungs.tags}>{res?.position}</Text>
+                <Text key={(() => Math.random())()} style={{...lungs.tags,  color:res?.id == 5? colors.black:"#990099"}}>{res?.position}</Text>
               )
             }
           </Pressable>
@@ -245,7 +245,7 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
             {patientLungsDetail?.[0]?.[recordingLine?.lungs_audio] && <Text style={styles.play_stop} >{currentSoundId == recordingLine?.id ? <Text style={styles.btn_text}>&#9208;</Text> : <Text style={styles.btn_text}>&#9654;</Text>}</Text>}
             {opt == "" &&
               patientLungsDetail?.[0]?.[recordingLine.lungs_tags] && JSON.parse(patientLungsDetail?.[0]?.[recordingLine?.lungs_tags])?.options?.map(res =>
-                <Text key={(() => Math.random())()} style={lungs.tags}>{res?.position}</Text>
+                <Text key={(() => Math.random())()} style={{...lungs.tags,  color:res?.id == 5? colors.black:"#990099"}}>{res?.position}</Text>
               )
             }
           </Pressable>

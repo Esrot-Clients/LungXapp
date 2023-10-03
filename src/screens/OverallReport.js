@@ -152,7 +152,7 @@ export default function OverallReport({ navigation, route }) {
               ele?.options?.map(option => (
                 option.isChecked &&
                 <>
-                  <Text key={(() => Math.random())()} style={lungs.tags}>{option.position}</Text>
+                  <Text key={(() => Math.random())()} style={{ ...lungs.tags, color: option?.id == 5 ? colors.black : "#990099" }}>{option.position}</Text>
                 </>
               ))
 
@@ -186,7 +186,7 @@ export default function OverallReport({ navigation, route }) {
               ele.options?.map(option => (
                 option.isChecked &&
                 <>
-                  <Text key={(() => Math.random())()} style={lungs.tags}>{option.position}</Text>
+                  <Text key={(() => Math.random())()} style={{ ...lungs.tags, color: option?.id == 5 ? colors.black : "#990099" }}>{option.position}</Text>
                 </>
               ))
             )
@@ -214,8 +214,10 @@ export default function OverallReport({ navigation, route }) {
       if (response.data.status == true) {
         setTimeout(() => {
           setloading(false)
-          navigation.navigate("Add Patient Home")
-        }, 20000);
+          setShowWarningPopup(true)
+           // navigation.navigate("Add Patient Home")
+         
+        }, 10000);
         handleClearAddPatientData()
 
       } else {
@@ -253,7 +255,7 @@ export default function OverallReport({ navigation, route }) {
           </Text>
         </View>
 
-        <Textinput label={"Patient name"} editable={false} value={patientname} />
+        <Textinput label={"Patient Name"} editable={false} value={patientname} />
         <Textinput label={"Patient ID"} editable={false} value={patientid + ""} />
 
         <View
@@ -322,18 +324,18 @@ export default function OverallReport({ navigation, route }) {
         {/*  */}
 
         <View style={styles.symptomsDetails}>
-          <View style={{...styles.antRecView}}>
+          <View style={{ ...styles.antRecView }}>
             <Title color={colors.green} size={fonts.font12}>
               Anterior Recordings and Tags
             </Title>
             <TouchableOpacity
-            onPress={() => navigation.push("Anterior Recording", {
-              EditAnteriorRecTag : 'Edit Anterior Rec Tag'
-            })}
+              onPress={() => navigation.push("Anterior Recording", {
+                EditAnteriorRecTag: 'Edit Anterior Rec Tag'
+              })}
             >
               <View
                 style={styles.antRecViewEditBtn}>
-                <Text style={{ fontFamily: "Montserrat-Medium", color: "#fff" }}>
+                <Text style={{ fontFamily: "Montserrat-Medium", color: "#fff" ,fontSize:13}}>
                   Edit
                 </Text>
               </View>
@@ -356,9 +358,24 @@ export default function OverallReport({ navigation, route }) {
         </View>
 
         <View style={styles.symptomsDetails}>
-          <Title color={colors.green} size={fonts.font12}>
-            Posterior Recordings and Tags
-          </Title>
+          <View style={{ ...styles.antRecView }}>
+            <Title color={colors.green} size={fonts.font12}>
+              Posterior Recordings and Tags
+            </Title>
+            <TouchableOpacity
+              onPress={() => navigation.push("Posterior Recording", {
+                EditPosteriorRecTag: 'Edit Posterior Rec Tag'
+              })}
+            >
+              <View
+                style={styles.antRecViewEditBtn}>
+                <Text style={{ fontFamily: "Montserrat-Medium", color: "#fff", fontSize:13 }}>
+                  Edit
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+
           <View style={lungs.wrapper}>
 
             <View style={lungs.btn_wrapper}>
@@ -424,6 +441,7 @@ export default function OverallReport({ navigation, route }) {
               label="Save Report"
               labelsize={12}
               color={colors.green}
+              // onPress={() => setShowWarningPopup(true)}
               onPress={() => handleSaveReport()}
             />
           </View>
@@ -435,10 +453,10 @@ export default function OverallReport({ navigation, route }) {
           <Image source={require("../assets/images/Saved.png")} />
           <View style={warningStyle.btnWrapper}>
 
-            <Pressable onPress={() => { navigation.navigate("Add Patient "), setShowWarningPopup(false) }}>
+            <Pressable onPress={() => { navigation.navigate("Add Patient Home"), setShowWarningPopup(false) }}>
               <Text style={warningStyle.btn}>Go to home</Text>
             </Pressable>
-            <Pressable onPress={() => { navigation.navigate("Patients list"); setShowWarningPopup(false) }}>
+            <Pressable onPress={() => { navigation.navigate("Add Patient Home"); navigation.navigate("Patients list"); setShowWarningPopup(false) }}>
               <Text style={warningStyle.btn}>View Patients list</Text>
             </Pressable>
           </View>
@@ -503,12 +521,12 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: "white"
   },
-  antRecView:{
+  antRecView: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  antRecViewEditBtn:{
+  antRecViewEditBtn: {
     backgroundColor: colors.green,
     paddingHorizontal: 10,
     paddingVertical: 5,

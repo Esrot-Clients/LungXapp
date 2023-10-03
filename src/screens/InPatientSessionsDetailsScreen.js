@@ -62,7 +62,7 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
       headers: {
         "Content-Type": "multipart/form-data"
       }
-    }).then(res => { setPatientDetail(res.data) }).catch(err => err)
+    }).then(res => {setPatientDetail(res.data) }).catch(err => err)
   }
   // get patient detail end
   useEffect(() => {
@@ -71,22 +71,23 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
   }, [focused, id])
 
   const [dayAndSessionFilter, setDayAndSessionFilter] = useState([{}])
+  
   useEffect(() => {
     let dates = []
     let dateSession = []
     patientDetail?.[0]?.patienthealthdata.forEach(ele => {
-      let day = new Date(ele.last_modified_at).getDate()
-      let month = new Date(ele.last_modified_at).getMonth()
-      let year = new Date(ele.last_modified_at).getFullYear()
+      let day = new Date(ele.created_at).getDate()
+      let month = new Date(ele.created_at).getMonth()+ 1;
+      let year = new Date(ele.created_at).getFullYear()
       const date = day + "-" + month + "-" + year
       dates = [...dates, date]
     })
     dates = [...new Set(dates)]
 
     patientDetail?.[0]?.patienthealthdata.forEach((ele, indexx) => {
-      let day = new Date(ele.last_modified_at).getDate()
-      let month = new Date(ele.last_modified_at).getMonth()
-      let year = new Date(ele.last_modified_at).getFullYear()
+      let day = new Date(ele.created_at).getDate()
+      let month = new Date(ele.created_at).getMonth()+ 1;
+      let year = new Date(ele.created_at).getFullYear()
       const date = day + "-" + month + "-" + year
       dates.forEach((dateStr, index) => {
         if (dateStr == date) {
@@ -107,6 +108,7 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
 
 
   const DailyReportContainer = (props) => (
+  
     <View style={styles.PatientDetailsContainer}>
       <TouchableOpacity disabled>
         <View style={{ flexDirection: 'row' }}>
@@ -169,6 +171,7 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
                     :
                     <TouchableOpacity
                       onPress={() => {
+                        resetStateObj();
                         // navigation.navigate('In Patient Details Session', { item: patientDetail?.[0], detailItem: item })
                         navigation.navigate("Add Patient", { existedPatientId: patientDetail?.[0]?.id, session: item?.session?.session, existedPatientHealthId: item?.session?.id })
                       }}>
@@ -213,7 +216,7 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
     </View>
   );
 
-
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <PatientDetailsCard />

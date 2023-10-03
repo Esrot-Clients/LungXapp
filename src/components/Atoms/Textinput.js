@@ -27,7 +27,7 @@ export const Textinput = ({
   multiline,
   editable,
   onChangeText,
-  onSubmitEditing,
+  onSubmitEditing,keyboardType
 }) => {
 
 
@@ -60,6 +60,7 @@ export const Textinput = ({
         placeholderTextColor="gray"
         autoCapitalize="none"
         multiline={height ? true : false}
+        keyboardType={keyboardType}
       />
     </View>
   );

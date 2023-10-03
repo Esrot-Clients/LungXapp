@@ -21,51 +21,16 @@ import LungXinstance from "../api/server";
 import ProgressStep from "../components/Molecules/ProgressStep";
 
 
-const SymptomsData = [
-  {
-    id: 1,
-    position: "Coarse crackle",
-    isChecked: false,
-  },
-  {
-    id: 2,
-    position: "Fine crackle",
-    isChecked: false,
-  },
-  {
-    id: 3,
-    position: "Ronchi",
-    isChecked: false,
-  },
-  {
-    id: 4,
-    position: "Wheeze",
-    isChecked: false,
-  },
-
-  {
-    id: 5,
-    position: "Normal",
-    isChecked: false,
-  },
-
-  {
-    id: 6,
-    position: "All",
-    isChecked: false,
-  },
-]
 
 
-export default function PosteriorTagging({ navigation }) {
-
-  const { recordingsPosterior, setRecordingsPosterior, PosteriorTagging, setPosteriorTagging, handlePosteriorfiltering, newlyCreatedPatientLungsId, newlyCreatedPatientId } = useContext(AddPatientContext)
+export default function PosteriorTagging({ navigation, route }) {
+  const EditPosteriorRecTag = route?.params?.EditPosteriorRecTag
+  const { recordingsPosterior, setRecordingsPosterior, PosteriorTagging, setPosteriorTagging, handlePosteriorfiltering, newlyCreatedPatientLungsId, newlyCreatedPatientId,settagsPosterior,tagsposterior } = useContext(AddPatientContext)
   const { user } = useContext(AuthContext);
 
   const [currrentStep, setCurrentStep] = useState(3);
 
   const [alltagVisible, setallTagVisible] = useState(false)
-  const [tags, settags] = useState(SymptomsData)
   const [activeLungsection, setActiveLungsection] = useState(null)
   const [showSoundsPopup, setShowSoundsPopup] = useState(false)
   const [showWarningPopup, setShowWarningPopup] = useState(false)
@@ -77,71 +42,6 @@ export default function PosteriorTagging({ navigation }) {
   }, [isFocused])
 
 
-  // const [recordingsPositions, setRecordingsPositions] = useState([
-  //   {
-  //     id: 1,
-  //     lungs_tags: "p7_tag",
-
-  //   },
-  //   {
-  //     id: 2,
-  //     lungs_tags: "p8_tag",
-  //   },
-  //   {
-  //     id: 3,
-  //     lungs_tags: "p9_tag",
-
-  //   },
-  //   {
-  //     id:4,
-  //     lungs_tags: "p10_tag",
-
-  //   },
-  //   {
-  //     id: 5,
-  //     lungs_tags: "p11_tag",
-
-  //   },
-  //   {
-  //     id: 6,
-  //     lungs_tags: "p12_tag",
-
-  //   }
-  // ]);
-
-  // const getPatientLungsDetail = async () => {
-  //   try {
-  //     var res = await LungXinstance.post(`api/lung_audio/`, { doctor_id: user.id, patient_id: newlyCreatedPatientId }, {
-  //       headers: {
-  //         "Content-Type": "multipart/form-data"
-  //       }
-  //     })
-  //     if(res?.data?.length >0){
-  //     var Data = res?.data?.[0]
-
-  //     recordingsPositions.map((recordingLine, index) => {
-  //       Data?.[recordingLine.lungs_tags] && JSON.parse(Data?.[recordingLine?.lungs_tags])?.options?.map(opt => {
-  //         PosteriorTagging.map((postag) => {
-  //           postag?.id === recordingLine?.id &&
-  //           postag?.options?.map((option) => {
-  //               if (option?.id === opt?.id) {
-  //                 option.isChecked = true;
-  //               }
-  //             })
-  //         })
-  //       }
-  //       )
-  //     })
-  //   }
-
-  //   } catch (e) {
-  //     console.log("Error...in posterior tagging...recording...", e)
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   getPatientLungsDetail()
-  // }, [])
 
 
 
@@ -149,14 +49,17 @@ export default function PosteriorTagging({ navigation }) {
     return recordingsPosterior?.map((recordingLine, index) => {
       return (
         <>
-          <Pressable onPress={() => setActiveLungsection(recordingLine?.id)} style={[styles.button_wrapper, recordingLine.style]} key={(() => Math.random())()}>
-            {activeLungsection == index + 7 && <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.13 }} source={testdel} />}
+          <Pressable onPress={() => { setallTagVisible(false); setActiveLungsection(recordingLine?.id) }} style={[styles.button_wrapper, recordingLine.style]} key={(() => Math.random())()}>
+            {activeLungsection == index + 7 &&
+              <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }} />
+              // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }} source={testdel} />
+            }
 
             {PosteriorTagging?.map((ele) =>
             (
               ele.id == index + 1 &&
               ele.options.map(option => (
-                option.isChecked &&
+                option.isChecked && option.id != 6 && option.id != 5 &&
                 <>
                   <Text key={(() => Math.random())()} style={lungsPosterior.tags}>{option.position}</Text>
                 </>
@@ -234,17 +137,31 @@ export default function PosteriorTagging({ navigation }) {
   }
 
   const handleTaggingAllAnteriorPosition = (symptomsName, state) => {
-    const newtag = tags.map((symptoms) => {
-      if (symptoms.position === symptomsName && state) return { ...symptoms, isChecked: true };
-      if (symptoms.position === symptomsName && !state) return { ...symptoms, isChecked: false };
+    const newtag = tagsposterior.map((symptoms) => {
+      if (symptomsName === "All" && state) {
+        return { ...symptoms, isChecked: true}
+      }
+      else if (symptoms.position == symptomsName) {
+        return { ...symptoms, isChecked: !symptoms.isChecked }
+      }
+       else if (symptoms.position == symptomsName && !state) {
+        return { ...symptoms, isChecked: false }
+      }
       return symptoms;
     });
-    settags(newtag);
+    settagsPosterior(newtag);
 
     const newAnteriorTagging = PosteriorTagging.map((position) => {
       const newAnteriorOption = position.options.map((symptoms) => {
-        if (symptoms.position === symptomsName && state) return { ...symptoms, isChecked: true };
-        if (symptoms.position === symptomsName && !state) return { ...symptoms, isChecked: false };
+        if (symptomsName === "All" && state) {
+          return { ...symptoms, isChecked: true }
+        }
+        else if (symptoms.position === symptomsName && state) {
+          return { ...symptoms, isChecked: !symptoms.isChecked }
+        }
+        else if (symptoms.position === symptomsName && !state) {
+          return { ...symptoms, isChecked: false }
+        }
         return symptoms;
       });
       return { ...position, options: newAnteriorOption };
@@ -253,13 +170,13 @@ export default function PosteriorTagging({ navigation }) {
   };
 
   const handleTagDiscarding = () => {
-    const newtags = tags.map(
+    const newtags = tagsposterior.map(
       symptoms => {
         return { ...symptoms, isChecked: false }
       }
 
     )
-    settags(newtags)
+    settagsPosterior(newtags)
     const newAnteriorTagging = PosteriorTagging.map((position) => {
       const newOptions = position.options.map((option) => {
         return { ...option, isChecked: false };
@@ -273,12 +190,7 @@ export default function PosteriorTagging({ navigation }) {
   //Anterior Tagging controller runs on  input changes (checkboxes)
 
   const handleAnteriorPositionTagging = (positionid, optionid, state) => {
-    console.log("handleAnteriorPositionTagging---positionid----------------------a-----")
-    // console.log(positionid)
-    console.log("handleAnteriorPositionTagging----optionid------------------------b---")
-    // console.log(optionid)
-    // console.log(state)
-
+   
     const newAnteriorTagging = PosteriorTagging.map((position) => {
       if (position.id === positionid && optionid != 6) {
         const newOptions = position.options.map((option) => {
@@ -356,7 +268,8 @@ export default function PosteriorTagging({ navigation }) {
                           alignItems: "flex-start",
                           paddingHorizontal: 10,
                           paddingVertical: 5,
-                          width: 130,
+                          // width: 130,
+                          marginLeft: 3,
                         }}
                       >
                         <View
@@ -383,19 +296,9 @@ export default function PosteriorTagging({ navigation }) {
 
         </>
 
-        <View style={{ width: metrics.screenWidth * 0.9, flexDirection: 'row', justifyContent: 'space-between', marginTop:10 }}>
-          <TouchableOpacity onPress={() => setallTagVisible(!alltagVisible)}>
-            <Text style={commonStyle.btn3}>Tag total lungs</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleTagDiscarding()}>
-            <Text style={commonStyle.btn3} color={colors.red} size={fonts.font12}>Discard Tags</Text>
-          </TouchableOpacity>
-        </View>
-
-
         {
           alltagVisible && (
-            <View style={{ marginTop:10 }}>
+            <View style={{ marginTop: 20, marginVertical: 5, }}>
               <View style={styles.optionsCard}>
                 <ScrollView
                   horizontal
@@ -409,13 +312,14 @@ export default function PosteriorTagging({ navigation }) {
                     bottom: 0,
                   }}
                 >
-                  {tags.length > 0 && tags.map((symptom, index) => (
+                  {tagsposterior.length > 0 && tagsposterior.map((symptom, index) => (
                     <View key={(() => Math.random())()}
                       style={{
                         alignItems: "flex-start",
                         paddingHorizontal: 10,
                         paddingVertical: 5,
-                        width: 130,
+                        // width: 130,
+                        marginLeft: 3,
                       }}
                     >
                       <View
@@ -440,12 +344,16 @@ export default function PosteriorTagging({ navigation }) {
           )
         }
 
+        <View style={{ width: metrics.screenWidth * 0.9, flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
+          <TouchableOpacity onPress={() => { setActiveLungsection(null); setallTagVisible(!alltagVisible) }}>
+            <Text style={commonStyle.btn3}>Tag total lungs</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleTagDiscarding()}>
+            <Text style={commonStyle.btn3} color={colors.red} size={fonts.font12}>Discard Tags</Text>
+          </TouchableOpacity>
+        </View>
 
-        {/* lungsPosterior image and activeLungsection selector buttons */}
 
-        {/* <View style={{ width: metrics.screenWidth * 0.9,marginBottom:40 }}>
-        <Text style={commonStyle.btn3}>Click to Select Positions</Text>
-      </View> */}
 
         <View style={lungsPosterior.wrapper}>
 
@@ -463,29 +371,32 @@ export default function PosteriorTagging({ navigation }) {
         <View
           style={{
             marginVertical: 20,
-            flexDirection:'row',
+            flexDirection: 'row',
             justifyContent: 'space-between',
             flex: 1,
             marginTop: 20,
-            width:"97%",
+            width: "97%",
           }}
         >
-          <View style={{ width: metrics.screenWidth * 0.43,left:5 }}>
-            <Button.BtnContain
-              label="Anterior tagging"
-              color="#F6FBF9"
-              labelsize={12}
-              labelColor={colors.green}
-              iconLeft={"arrow-left"}
-              onPress={() => {
-                navigation.goBack();
-              }}
-            />
+          <View style={{ width: metrics.screenWidth * 0.43, left: 5 }}>
+            {EditPosteriorRecTag ?
+              <></> :
+              <Button.BtnContain
+                label="Anterior tagging"
+                color="#F6FBF9"
+                labelsize={12}
+                labelColor={colors.green}
+                iconLeft={"arrow-left"}
+                onPress={() => {
+                  navigation.goBack();
+                }}
+              />
+            }
           </View>
 
           <View style={{ width: metrics.screenWidth * 0.49, }}>
             <Button.BtnContain
-              label="Continue to report"
+              label={EditPosteriorRecTag?"Continue to save":"Continue to report"}
               color="#F6FBF9"
               labelsize={12}
               labelColor={colors.green}
@@ -509,7 +420,7 @@ export default function PosteriorTagging({ navigation }) {
       <Modal visible={showWarningPopup} contentContainerStyle={containerStyle} onDismiss={() => setShowWarningPopup(false)}>
         <View style={warningStyle.main}>
           <Text style={warningStyle.title}>Confirm</Text>
-          <Text style={warningStyle.title2}>Continue to Tag Posterior ?</Text>
+          <Text style={warningStyle.title2}>Continue to {EditPosteriorRecTag? "save" : "report"} ?</Text>
           <Text style={warningStyle.warn}>Rest all positions will auto tag to Normal</Text>
           <View style={warningStyle.btnWrapper}>
 
@@ -548,9 +459,9 @@ const styles = StyleSheet.create({
   },
   SymptomsCard: {
     flexDirection: "row",
-    width: metrics.screenWidth*0.9,
+    width: metrics.screenWidth * 0.9,
     padding: 10,
-    marginLeft:15
+    marginLeft: 15
   },
   optionsCard: {
     width: metrics.screenWidth,
@@ -641,11 +552,13 @@ export const commonStyle = StyleSheet.create({
     backgroundColor: "#F7FBF9",
     paddingVertical: 4,
     paddingHorizontal: 8,
-    color: "green",
+    color: colors.green,
     borderRadius: 4,
     display: "flex",
     alignSelf: "flex-start",
-    marginVertical: 8
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.green
 
   }
 })
@@ -702,7 +615,7 @@ export const warningStyle = StyleSheet.create({
     color: "white",
     backgroundColor: "#51B592",
     fontWeight: "600",
-    fontSize: 18,
+    fontSize: 15,
     paddingVertical: 6,
     borderRadius: 6,
     marginTop: 12,

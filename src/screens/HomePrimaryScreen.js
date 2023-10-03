@@ -44,7 +44,7 @@ export default function HomePrimaryScreen({navigation}) {
               marginRight: 20,
             }}
           >
-            <TouchableOpacity>
+            {/* <TouchableOpacity>
               <MaterialCommunityIcons
                 name="bell-outline"
                 size={25}
@@ -57,7 +57,7 @@ export default function HomePrimaryScreen({navigation}) {
                 size={25}
                 color={"#000"}
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </TouchableOpacity>
       ),

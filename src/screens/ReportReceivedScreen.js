@@ -539,11 +539,11 @@ export default function ReportReceivedScreen({ navigation, route }) {
       console.error("Failed to play sound", error);
     }
   }
-  
+
   useEffect(() => {
     sound.setOnPlaybackStatusUpdate((status) => {
       if (status.didJustFinish) {
-        setCurrentSoundId(null); 
+        setCurrentSoundId(null);
       }
     });
   }, [sound]);
@@ -557,7 +557,7 @@ export default function ReportReceivedScreen({ navigation, route }) {
             {lungAudioData?.[0]?.[recordingLine?.lungs_audio] && <Text style={styles.play_stop} >{currentSoundId == index ? <Text style={styles.btn_text}>&#9208;</Text> : <Text style={styles.btn_text}>&#9654;</Text>}</Text>}
             {
               lungAudioData?.[0]?.[recordingLine.lungs_tags] && JSON.parse(lungAudioData?.[0]?.[recordingLine?.lungs_tags])?.options?.map(res =>
-                <Text key={(() => Math.random())()} style={lungs.tags}>{res?.position}</Text>
+                <Text key={(() => Math.random())()} style={{ ...lungs.tags, color: res?.id == 5 ? colors.black : "#990099" }}>{res?.position}</Text>
               )
             }
           </Pressable>
@@ -574,7 +574,7 @@ export default function ReportReceivedScreen({ navigation, route }) {
             {lungAudioData?.[0]?.[recordingLine?.lungs_audio] && <Text style={styles.play_stop} >{currentSoundId == recordingLine?.id ? <Text style={styles.btn_text}>&#9208;</Text> : <Text style={styles.btn_text}>&#9654;</Text>}</Text>}
             {
               lungAudioData?.[0]?.[recordingLine.lungs_tags] && JSON.parse(lungAudioData?.[0]?.[recordingLine?.lungs_tags])?.options?.map(res =>
-                <Text key={(() => Math.random())()} style={lungs.tags}>{res?.position}</Text>
+                <Text key={(() => Math.random())()} style={{ ...lungs.tags, color: res?.id == 5 ? colors.black : "#990099" }}>{res?.position}</Text>
               )
             }
           </Pressable>
@@ -592,15 +592,23 @@ export default function ReportReceivedScreen({ navigation, route }) {
       }
 
       <View style={styles.InfoContainer}>
-        <SubTitle size={fonts.font12}>Doctor Name : {doctorData?.user?.name}</SubTitle>
+        {doctorData?.user?.name &&
+          <SubTitle size={fonts.font12}>Doctor Name : {doctorData?.user?.name}</SubTitle>
+        }
 
-        <SubTitle size={fonts.font12}>Doctor ID : {doctorData?.profile_id}</SubTitle>
+        {doctorData?.profile_id &&
+          <SubTitle size={fonts.font12}>Doctor ID : {doctorData?.profile_id}</SubTitle>
+        }
 
-        <SubTitle size={fonts.font12}>Speciality : {doctorData?.doc_dept}</SubTitle>
+        {doctorData?.doc_dept &&
+          <SubTitle size={fonts.font12}>Speciality : {doctorData?.doc_dept}</SubTitle>
+        }
 
-        <SubTitle size={fonts.font12}>
-          Hospital Name : {doctorData?.hospital}
-        </SubTitle>
+        {doctorData?.hospital &&
+          <SubTitle size={fonts.font12}>
+            Hospital Name : {doctorData?.hospital}
+          </SubTitle>
+        }
 
         <View style={{ alignItems: 'flex-end', marginTop: 10, marginBottom: 10 }}>
           <Title >Patient Status: {patientData?.in_patient ? "In-patient" : "Out-patient"}</Title>
@@ -643,7 +651,7 @@ const styles = StyleSheet.create({
   },
   InfoContainer: {
     width: metrics.screenWidth * 0.9,
-    marginTop:10
+    marginTop: 10
   },
   PatientDetailsContainer: {
     width: metrics.screenWidth * 0.9,

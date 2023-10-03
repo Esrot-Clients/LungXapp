@@ -49,6 +49,42 @@ const SymptomsData = [
   },
 ];
 
+const SymptomsDatapost = [
+  {
+    id: 1,
+    position: "Coarse crackle",
+    isChecked: false,
+  },
+  {
+    id: 2,
+    position: "Fine crackle",
+    isChecked: false,
+  },
+  {
+    id: 3,
+    position: "Ronchi",
+    isChecked: false,
+  },
+  {
+    id: 4,
+    position: "Wheeze",
+    isChecked: false,
+  },
+
+  {
+    id: 5,
+    position: "Normal",
+    isChecked: false,
+  },
+
+  {
+    id: 6,
+    position: "All",
+    isChecked: false,
+  },
+]
+
+
 export const AddPatientProvider = ({ children }) => {
 
 
@@ -89,6 +125,7 @@ export const AddPatientProvider = ({ children }) => {
   const [filteredLifeStyle, setfilteredLifeStyleData] = useState([])
 
   const [tags, settags] = useState(SymptomsData);
+  const [tagsposterior, settagsPosterior] = useState(SymptomsDatapost);
   const [AnteriorTagging, setAnteriorTagging] = useState(AnteriorTaggingData);
   const [filteredAnteriorTags, setfilteredAnteriorTags] = useState([])
   const [PosteriorTagging, setPosteriorTagging] = useState(PosteriorTaggingData);
@@ -268,9 +305,524 @@ export const AddPatientProvider = ({ children }) => {
         id: 2,
       },
     ])
-    setPosteriorTagging(PosteriorTaggingData)
-    setAnteriorTagging(AnteriorTaggingData)
+    // setPosteriorTagging(PosteriorTaggingData)
+    // setAnteriorTagging(AnteriorTaggingData)
+    setPosteriorTagging([
+      {
+        id: 1,
+        position: "Postion 7",
+        optionid: 1,
+        options: [
+          {
+            id: 1,
+            position: "Coarse crackle",
+            isChecked: false,
+          },
+          {
+            id: 2,
+            position: "Fine crackle",
+            isChecked: false,
+          },
+          {
+            id: 3,
+            position: "Ronchi",
+            isChecked: false,
+          },
+          {
+            id: 4,
+            position: "Wheeze",
+            isChecked: false,
+          },
+
+          {
+            id: 5,
+            position: "Normal",
+            isChecked: false,
+          },
+
+          {
+            id: 6,
+            position: "All",
+            isChecked: false,
+          },
+        ],
+      },
+
+      {
+        id: 2,
+        position: "Postion 8",
+        optionid: 1,
+        options: [
+          {
+            id: 1,
+            position: "Coarse crackle",
+            isChecked: false,
+          },
+          {
+            id: 2,
+            position: "Fine crackle",
+            isChecked: false,
+          },
+          {
+            id: 3,
+            position: "Ronchi",
+            isChecked: false,
+          },
+          {
+            id: 4,
+            position: "Wheeze",
+            isChecked: false,
+          },
+
+          {
+            id: 5,
+            position: "Normal",
+            isChecked: false,
+          },
+
+          {
+            id: 6,
+            position: "All",
+            isChecked: false,
+          },
+        ],
+      },
+      {
+        id: 3,
+        position: "Postion 9",
+        optionid: 1,
+        options: [
+          {
+            id: 1,
+            position: "Coarse crackle",
+            isChecked: false,
+          },
+          {
+            id: 2,
+            position: "Fine crackle",
+            isChecked: false,
+          },
+          {
+            id: 3,
+            position: "Ronchi",
+            isChecked: false,
+          },
+          {
+            id: 4,
+            position: "Wheeze",
+            isChecked: false,
+          },
+
+          {
+            id: 5,
+            position: "Normal",
+            isChecked: false,
+          },
+
+          {
+            id: 6,
+            position: "All",
+            isChecked: false,
+          },
+        ],
+      },
+      {
+        id: 4,
+        position: "Postion 10",
+        optionid: 1,
+        options: [
+          {
+            id: 1,
+            position: "Coarse crackle",
+            isChecked: false,
+          },
+          {
+            id: 2,
+            position: "Fine crackle",
+            isChecked: false,
+          },
+          {
+            id: 3,
+            position: "Ronchi",
+            isChecked: false,
+          },
+          {
+            id: 4,
+            position: "Wheeze",
+            isChecked: false,
+          },
+
+          {
+            id: 5,
+            position: "Normal",
+            isChecked: false,
+          },
+
+          {
+            id: 6,
+            position: "All",
+            isChecked: false,
+          },
+        ],
+      },
+      {
+        id: 5,
+        position: "Postion 11",
+        optionid: 1,
+        options: [
+          {
+            id: 1,
+            position: "Coarse crackle",
+            isChecked: false,
+          },
+          {
+            id: 2,
+            position: "Fine crackle",
+            isChecked: false,
+          },
+          {
+            id: 3,
+            position: "Ronchi",
+            isChecked: false,
+          },
+          {
+            id: 4,
+            position: "Wheeze",
+            isChecked: false,
+          },
+
+          {
+            id: 5,
+            position: "Normal",
+            isChecked: false,
+          },
+
+          {
+            id: 6,
+            position: "All",
+            isChecked: false,
+          },
+        ],
+      },
+      {
+        id: 6,
+        position: "Postion 12",
+        optionid: 1,
+        options: [
+          {
+            id: 1,
+            position: "Coarse crackle",
+            isChecked: false,
+          },
+          {
+            id: 2,
+            position: "Fine crackle",
+            isChecked: false,
+          },
+          {
+            id: 3,
+            position: "Ronchi",
+            isChecked: false,
+          },
+          {
+            id: 4,
+            position: "Wheeze",
+            isChecked: false,
+          },
+
+          {
+            id: 5,
+            position: "Normal",
+            isChecked: false,
+          },
+
+          {
+            id: 6,
+            position: "All",
+            isChecked: false,
+          },
+        ],
+      },
+
+    ])
+    setAnteriorTagging([
+      {
+        id: 1,
+        position: "Position 0",
+        optionid: 1,
+        options: [
+          {
+            id: 1,
+            position: "Coarse crackle",
+            isChecked: false,
+          },
+          {
+            id: 2,
+            position: "Fine crackle",
+            isChecked: false,
+          },
+          {
+            id: 3,
+            position: "Ronchi",
+            isChecked: false,
+          },
+          {
+            id: 4,
+            position: "Wheeze",
+            isChecked: false,
+          },
+
+          {
+            id: 5,
+            position: "Normal",
+            isChecked: false,
+          },
+
+          {
+            id: 6,
+            position: "All",
+            isChecked: false,
+          },
+        ],
+      },
+
+      {
+        id: 2,
+        position: "Position 1",
+        optionid: 1,
+        options: [
+          {
+            id: 1,
+            position: "Coarse crackle",
+            isChecked: false,
+          },
+          {
+            id: 2,
+            position: "Fine crackle",
+            isChecked: false,
+          },
+          {
+            id: 3,
+            position: "Ronchi",
+            isChecked: false,
+          },
+          {
+            id: 4,
+            position: "Wheeze",
+            isChecked: false,
+          },
+
+          {
+            id: 5,
+            position: "Normal",
+            isChecked: false,
+          },
+
+          {
+            id: 6,
+            position: "All",
+            isChecked: false,
+          },
+        ],
+      },
+      {
+        id: 3,
+        position: "Position 2",
+        optionid: 1,
+        options: [
+          {
+            id: 1,
+            position: "Coarse crackle",
+            isChecked: false,
+          },
+          {
+            id: 2,
+            position: "Fine crackle",
+            isChecked: false,
+          },
+          {
+            id: 3,
+            position: "Ronchi",
+            isChecked: false,
+          },
+          {
+            id: 4,
+            position: "Wheeze",
+            isChecked: false,
+          },
+
+          {
+            id: 5,
+            position: "Normal",
+            isChecked: false,
+          },
+
+          {
+            id: 6,
+            position: "All",
+            isChecked: false,
+          },
+        ],
+      },
+      {
+        id: 4,
+        position: "Position 3",
+        optionid: 1,
+        options: [
+          {
+            id: 1,
+            position: "Coarse crackle",
+            isChecked: false,
+          },
+          {
+            id: 2,
+            position: "Fine crackle",
+            isChecked: false,
+          },
+          {
+            id: 3,
+            position: "Ronchi",
+            isChecked: false,
+          },
+          {
+            id: 4,
+            position: "Wheeze",
+            isChecked: false,
+          },
+
+          {
+            id: 5,
+            position: "Normal",
+            isChecked: false,
+          },
+
+          {
+            id: 6,
+            position: "All",
+            isChecked: false,
+          },
+        ],
+      },
+      {
+        id: 5,
+        position: "Position 4",
+        optionid: 1,
+        options: [
+          {
+            id: 1,
+            position: "Coarse crackle",
+            isChecked: false,
+          },
+          {
+            id: 2,
+            position: "Fine crackle",
+            isChecked: false,
+          },
+          {
+            id: 3,
+            position: "Ronchi",
+            isChecked: false,
+          },
+          {
+            id: 4,
+            position: "Wheeze",
+            isChecked: false,
+          },
+
+          {
+            id: 5,
+            position: "Normal",
+            isChecked: false,
+          },
+
+          {
+            id: 6,
+            position: "All",
+            isChecked: false,
+          },
+        ],
+      },
+      {
+        id: 6,
+        position: "Position 5",
+        optionid: 1,
+        options: [
+          {
+            id: 1,
+            position: "Coarse crackle",
+            isChecked: false,
+          },
+          {
+            id: 2,
+            position: "Fine crackle",
+            isChecked: false,
+          },
+          {
+            id: 3,
+            position: "Ronchi",
+            isChecked: false,
+          },
+          {
+            id: 4,
+            position: "Wheeze",
+            isChecked: false,
+          },
+
+          {
+            id: 5,
+            position: "Normal",
+            isChecked: false,
+          },
+
+          {
+            id: 6,
+            position: "All",
+            isChecked: false,
+          },
+        ],
+      },
+      {
+        id: 7,
+        position: "Position 6",
+        optionid: 1,
+        options: [
+          {
+            id: 1,
+            position: "Coarse crackle",
+            isChecked: false,
+          },
+          {
+            id: 2,
+            position: "Fine crackle",
+            isChecked: false,
+          },
+          {
+            id: 3,
+            position: "Ronchi",
+            isChecked: false,
+          },
+          {
+            id: 4,
+            position: "Wheeze",
+            isChecked: false,
+          },
+
+          {
+            id: 5,
+            position: "Normal",
+            isChecked: false,
+          },
+
+          {
+            id: 6,
+            position: "All",
+            isChecked: false,
+          },
+        ],
+      },
+    ])
     settags(SymptomsData)
+    settagsPosterior(SymptomsDatapost)
     setLifeStyleHabits(LifeStyleHabitsData)
     setChronicSymptomsData(ChronicDiseasesData)
     setChiefSymptomsData(ChiefComplaintsData)
@@ -416,8 +968,7 @@ export const AddPatientProvider = ({ children }) => {
   // question select handling
 
   const handleChiefSymptomsQuestionSelect = (questionID) => {
-    console.log("questionID--------------")
-    // console.log(questionID)
+    // console.log("questionID--------------",questionID)
     const UpdatedData = ChiefSymptomsData.map((question) => {
       if (question.id === questionID) {
         return { ...question, isChecked: !question.isChecked, optionid: null };
@@ -453,8 +1004,7 @@ export const AddPatientProvider = ({ children }) => {
   };
 
   const handleChiefOptionSelect = (optionID, indexOfOptioninQuestion) => {
-    console.log("optionID, indexOfOptioninQuestion---------------")
-    // console.log(optionID, indexOfOptioninQuestion)
+    // console.log("optionID, indexOfOptioninQuestion---------------",optionID,indexOfOptioninQuestion)
     const UpdatedOptions = ChiefSymptomsData.map((question, index) => {
       if (question.isChecked === true && index === indexOfOptioninQuestion) {
         const UpdatedSelection = question.options.map((option) => {
@@ -576,21 +1126,37 @@ export const AddPatientProvider = ({ children }) => {
 
   const handleTaggingAllAnteriorPosition = (symptomsName, state) => {
     const newtag = tags.map((symptoms) => {
-      if (symptoms.position === symptomsName && state) return { ...symptoms, isChecked: true };
-      if (symptoms.position === symptomsName && !state) return { ...symptoms, isChecked: false };
+      if (symptomsName === "All" && state) {
+        return { ...symptoms, isChecked: true }
+      }
+      else if (symptoms.position == symptomsName) {
+        return { ...symptoms, isChecked: !symptoms.isChecked }
+      } 
+      else if (symptoms.position == symptomsName && !state) {
+        return { ...symptoms, isChecked: false }
+      }
       return symptoms;
     });
     settags(newtag);
 
+
     const newAnteriorTagging = AnteriorTagging.map((position) => {
       const newAnteriorOption = position.options.map((symptoms) => {
-        if (symptoms.position === symptomsName && state) return { ...symptoms, isChecked: true };
-        if (symptoms.position === symptomsName && !state) return { ...symptoms, isChecked: false };
+        if (symptomsName === "All" && state) {
+          return { ...symptoms, isChecked: true }
+        }
+        else if (symptoms.position === symptomsName && state) {
+          return { ...symptoms, isChecked: !symptoms.isChecked }
+        }
+        else if (symptoms.position === symptomsName && !state) {
+          return { ...symptoms, isChecked: false }
+        }
         return symptoms;
       });
       return { ...position, options: newAnteriorOption };
     });
     setAnteriorTagging(newAnteriorTagging);
+
   };
 
 
@@ -645,7 +1211,7 @@ export const AddPatientProvider = ({ children }) => {
   //Anterior Tagging controller runs on submit all inputs (checkboxes)
   const handleAnteriorFiltering = ({ id, doctor, patient }) => {
     const filteredAnteriorTaggingData = AnteriorTagging.map((item) => {
-      const selectedOptions = item.options.filter((option) => option.isChecked);
+      const selectedOptions = item.options.filter((option) => option.isChecked && option.id != 5 && option.id != 6);
       if (selectedOptions.length > 0) {
         return {
           id: item.id,
@@ -684,7 +1250,8 @@ export const AddPatientProvider = ({ children }) => {
   }
   const handlePosteriorfiltering = ({ id, doctor, patient }) => {
     const filteredPosteriorTaggingData = PosteriorTagging.map((item) => {
-      const selectedOptions = item.options.filter((option) => option.isChecked);
+      const selectedOptions = item.options.filter((option) => option.isChecked && option.id != 5 && option.id != 6);
+     
       if (selectedOptions.length > 0) {
         return {
           id: item.id,
@@ -1270,6 +1837,7 @@ export const AddPatientProvider = ({ children }) => {
       },
     ])
     settags(SymptomsData)
+    settagsPosterior(SymptomsDatapost)
     setLifeStyleHabits(LifeStyleHabitsData)
     setChronicSymptomsData(ChronicDiseasesData)
     setChiefSymptomsData(ChiefComplaintsData)
@@ -1437,6 +2005,7 @@ export const AddPatientProvider = ({ children }) => {
       filteredChronicSymptoms,
       filteredLifeStyle,
       tags,
+      tagsposterior,
       AnteriorTagging,
       filteredAnteriorTags,
       PosteriorTagging,
@@ -1459,6 +2028,7 @@ export const AddPatientProvider = ({ children }) => {
       setLifeStyleHabits,
       setaddtionalNotes,
       settags,
+      settagsPosterior,
       setAnteriorTagging,
       setPosteriorTagging,
       handleChiefSymptomsQuestionSelect,

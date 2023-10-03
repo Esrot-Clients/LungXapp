@@ -93,15 +93,18 @@ export default function AnteriorTagging({ route, navigation }) {
     return recordingsPosition.map((recordingLine, index) => {
       return (
         <>
-          <Pressable onPress={() => setActiveLungsection(recordingLine?.id)} style={[recordingLine.style, styles.button_wrapper]} key=
+          <Pressable onPress={() => { setallTagVisible(false); setActiveLungsection(recordingLine?.id) }} style={[recordingLine.style, styles.button_wrapper]} key=
             {(() => Math.random())()}>
-            {activeLungsection == index && <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.13 }} source={testdel} />}
+            {activeLungsection == index && 
+            <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }}/>
+            // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
+            }
             {AnteriorTagging.map((ele) =>
             (
               ele.id == index + 1 &&
 
               ele.options.map(option => (
-                option.isChecked &&
+                option.isChecked && option.id != 6 && option.id != 5 &&
                 <>
                   <Text key={(() => Math.random())()} style={lungs.tags}>{option.position}</Text>
                 </>
@@ -225,7 +228,8 @@ export default function AnteriorTagging({ route, navigation }) {
                           alignItems: "flex-start",
                           paddingHorizontal: 10,
                           paddingVertical: 5,
-                          width: 130,
+                          // width: 130,
+                          marginLeft:3,
                         }}
                       >
                         <View
@@ -257,27 +261,9 @@ export default function AnteriorTagging({ route, navigation }) {
           ))}
         </>
 
-        {/* total & discard tags */}
-        <View
-          style={{
-            width: metrics.screenWidth * 0.9,
-            flexDirection: "row",
-            justifyContent: "space-between", marginTop: 10
-          }}
-        >
-          <TouchableOpacity onPress={() => setallTagVisible(!alltagVisible)}>
-            <Text style={commonStyle.btn3}>Tag total lungs</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleTagDiscarding()}>
-            <Text style={commonStyle.btn3} size={fonts.font12}>
-              Discard Tags
-            </Text>
-          </TouchableOpacity>
-        </View>
-
         {/* total tags checbox row */}
         {alltagVisible && (
-          <View style={{ marginVertical: 5 }}>
+          <View style={{ marginVertical: 5, marginTop: 20 }}>
             <View style={styles.optionsCard}>
               <ScrollView
                 horizontal
@@ -298,10 +284,11 @@ export default function AnteriorTagging({ route, navigation }) {
                       alignItems: "flex-start",
                       paddingHorizontal: 10,
                       paddingVertical: 5,
-                      width: 130,
+                      // width: 130, 
+                      marginLeft:3,
                     }}
                   >
-                    <View style={{ alignItems: "center", flexDirection: "row" }}>
+                    <View style={{ alignItems: "center", flexDirection: "row", }}>
 
                       <RadioButton.Android
                         theme={{ padding: 100 }}
@@ -314,7 +301,9 @@ export default function AnteriorTagging({ route, navigation }) {
 
                       </RadioButton.Android>
                       <View style={{ width: 2 }} />
-                      <Text style={styles.symptomName} >{symptom.position}</Text>
+                      <Typography.SubTitle size={fonts.font10}>
+                        {symptom.position}
+                      </Typography.SubTitle>
                     </View>
                   </View>
                 ))
@@ -323,6 +312,27 @@ export default function AnteriorTagging({ route, navigation }) {
             </View>
           </View>
         )}
+
+        {/* total & discard tags */}
+        <View
+          style={{
+            width: metrics.screenWidth * 0.9,
+            flexDirection: "row",
+            justifyContent: "space-between", marginTop: 10
+          }}
+        >
+          <TouchableOpacity onPress={() => { setActiveLungsection(null); setallTagVisible(!alltagVisible) }}>
+            <Text style={commonStyle.btn3}>Tag total lungs</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleTagDiscarding()}>
+            <Text style={commonStyle.btn3} size={fonts.font12}>
+              Discard Tags
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+
+
 
         {/* lungs image and activeLungsection selector buttons */}
 
@@ -379,7 +389,7 @@ export default function AnteriorTagging({ route, navigation }) {
       <Modal visible={showWarningPopup} contentContainerStyle={containerStyle} onDismiss={() => setShowWarningPopup(false)}>
         <View style={warningStyle.main}>
           <Text style={warningStyle.title}>Confirm</Text>
-          <Text style={warningStyle.title2}>Continue to Tag Anterior ?</Text>
+          <Text style={warningStyle.title2}>Continue to {EditAnteriorRecTag? "save" : "Tag Posterior"} ?</Text>
           <Text style={warningStyle.warn}>Rest all positions will auto tag to Normal</Text>
           <View style={warningStyle.btnWrapper}>
 

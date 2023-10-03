@@ -1,18 +1,12 @@
-import { StyleSheet, Text, View, TextInput } from 'react-native'
+import { StyleSheet, Text, View, TextInput ,TouchableOpacity} from 'react-native'
 import React from 'react'
-
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
 import colors from '../../constants/colors';
 import metrics from '../../constants/layout';
 
 
-// interface Props {
-//     placeholder ?: string,
-// }
-
 export default function SearchBar(
-    {placeholder = 'Search for patients, sort by Date'}
+    {placeholder = 'Search for Patient Id',handleFiltering ,handleDateFilter}
 ) {
   return (
     <View
@@ -33,20 +27,19 @@ export default function SearchBar(
           name="magnify"
           size={20}
           color={colors.green}
+          style={{right:5}}
         />
         <TextInput
           style={styles.input}
           placeholder={placeholder}
-          // placeholderTextColor={'#8A8A8A'}
-          // cursorColor="#8A8A8A"
-          // onChangeText={handleText}
-          // value={query}
+          onChangeText={text => handleFiltering(text)}
+          keyboardType="numeric"
         />
       </View>
     </View>
-    <View>
+    <TouchableOpacity onPress={()=>handleDateFilter()}>
       <MaterialCommunityIcons name="tune" size={30} color={colors.green} />
-    </View>
+    </TouchableOpacity>
   </View>
   )
 }

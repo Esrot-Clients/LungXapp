@@ -32,14 +32,13 @@ if(item.patienthealthdata?.[len]?.status== true){
 }
 }
   
-
   return (
     <View style={styles.PatientDetailsContainer}>
       <TouchableOpacity disabled={showView} onPress={onPress}>
         <View style={{ flexDirection: 'row' }}>
-          <View>
+        <View>
             <Typography.Title size={fonts.font12}>Patient ID  : {item?.patient_code}</Typography.Title>
-            <Typography.SubTitle>Date : {new Date(item?.last_modified_at).toLocaleDateString().replaceAll('/', "-")}</Typography.SubTitle>
+            <Typography.SubTitle>Date : {new Date(item?.created_at).toLocaleDateString().replaceAll('/', "-")}</Typography.SubTitle>
           </View>
           {showViewbtn? (
             <View
