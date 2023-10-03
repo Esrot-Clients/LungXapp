@@ -49,6 +49,42 @@ const SymptomsData = [
   },
 ];
 
+const SymptomsDatapost = [
+  {
+    id: 1,
+    position: "Coarse crackle",
+    isChecked: false,
+  },
+  {
+    id: 2,
+    position: "Fine crackle",
+    isChecked: false,
+  },
+  {
+    id: 3,
+    position: "Ronchi",
+    isChecked: false,
+  },
+  {
+    id: 4,
+    position: "Wheeze",
+    isChecked: false,
+  },
+
+  {
+    id: 5,
+    position: "Normal",
+    isChecked: false,
+  },
+
+  {
+    id: 6,
+    position: "All",
+    isChecked: false,
+  },
+]
+
+
 export const AddPatientProvider = ({ children }) => {
 
 
@@ -89,6 +125,7 @@ export const AddPatientProvider = ({ children }) => {
   const [filteredLifeStyle, setfilteredLifeStyleData] = useState([])
 
   const [tags, settags] = useState(SymptomsData);
+  const [tagsposterior, settagsPosterior] = useState(SymptomsDatapost);
   const [AnteriorTagging, setAnteriorTagging] = useState(AnteriorTaggingData);
   const [filteredAnteriorTags, setfilteredAnteriorTags] = useState([])
   const [PosteriorTagging, setPosteriorTagging] = useState(PosteriorTaggingData);
@@ -785,6 +822,7 @@ export const AddPatientProvider = ({ children }) => {
       },
     ])
     settags(SymptomsData)
+    settagsPosterior(SymptomsDatapost)
     setLifeStyleHabits(LifeStyleHabitsData)
     setChronicSymptomsData(ChronicDiseasesData)
     setChiefSymptomsData(ChiefComplaintsData)
@@ -1088,21 +1126,37 @@ export const AddPatientProvider = ({ children }) => {
 
   const handleTaggingAllAnteriorPosition = (symptomsName, state) => {
     const newtag = tags.map((symptoms) => {
-      if (symptoms.position === symptomsName && state) return { ...symptoms, isChecked: true };
-      if (symptoms.position === symptomsName && !state) return { ...symptoms, isChecked: false };
+      if (symptomsName === "All" && state) {
+        return { ...symptoms, isChecked: true }
+      }
+      else if (symptoms.position == symptomsName) {
+        return { ...symptoms, isChecked: !symptoms.isChecked }
+      } 
+      else if (symptoms.position == symptomsName && !state) {
+        return { ...symptoms, isChecked: false }
+      }
       return symptoms;
     });
     settags(newtag);
 
+
     const newAnteriorTagging = AnteriorTagging.map((position) => {
       const newAnteriorOption = position.options.map((symptoms) => {
-        if (symptoms.position === symptomsName && state) return { ...symptoms, isChecked: true };
-        if (symptoms.position === symptomsName && !state) return { ...symptoms, isChecked: false };
+        if (symptomsName === "All" && state) {
+          return { ...symptoms, isChecked: true }
+        }
+        else if (symptoms.position === symptomsName && state) {
+          return { ...symptoms, isChecked: !symptoms.isChecked }
+        }
+        else if (symptoms.position === symptomsName && !state) {
+          return { ...symptoms, isChecked: false }
+        }
         return symptoms;
       });
       return { ...position, options: newAnteriorOption };
     });
     setAnteriorTagging(newAnteriorTagging);
+
   };
 
 
@@ -1157,7 +1211,7 @@ export const AddPatientProvider = ({ children }) => {
   //Anterior Tagging controller runs on submit all inputs (checkboxes)
   const handleAnteriorFiltering = ({ id, doctor, patient }) => {
     const filteredAnteriorTaggingData = AnteriorTagging.map((item) => {
-      const selectedOptions = item.options.filter((option) => option.isChecked);
+      const selectedOptions = item.options.filter((option) => option.isChecked && option.id != 5 && option.id != 6);
       if (selectedOptions.length > 0) {
         return {
           id: item.id,
@@ -1196,7 +1250,8 @@ export const AddPatientProvider = ({ children }) => {
   }
   const handlePosteriorfiltering = ({ id, doctor, patient }) => {
     const filteredPosteriorTaggingData = PosteriorTagging.map((item) => {
-      const selectedOptions = item.options.filter((option) => option.isChecked);
+      const selectedOptions = item.options.filter((option) => option.isChecked && option.id != 5 && option.id != 6);
+     
       if (selectedOptions.length > 0) {
         return {
           id: item.id,
@@ -1782,6 +1837,7 @@ export const AddPatientProvider = ({ children }) => {
       },
     ])
     settags(SymptomsData)
+    settagsPosterior(SymptomsDatapost)
     setLifeStyleHabits(LifeStyleHabitsData)
     setChronicSymptomsData(ChronicDiseasesData)
     setChiefSymptomsData(ChiefComplaintsData)
@@ -1949,6 +2005,7 @@ export const AddPatientProvider = ({ children }) => {
       filteredChronicSymptoms,
       filteredLifeStyle,
       tags,
+      tagsposterior,
       AnteriorTagging,
       filteredAnteriorTags,
       PosteriorTagging,
@@ -1971,6 +2028,7 @@ export const AddPatientProvider = ({ children }) => {
       setLifeStyleHabits,
       setaddtionalNotes,
       settags,
+      settagsPosterior,
       setAnteriorTagging,
       setPosteriorTagging,
       handleChiefSymptomsQuestionSelect,

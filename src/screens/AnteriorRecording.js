@@ -49,67 +49,76 @@ export default function AnteriorRecording({ route, navigation }) {
 
   async function handlePatientAnteriorRecordings() {
 
-    recordings.forEach(async (ele, index) => {
-      if (ele.file != "") {
+    if (isRecording) {
+      ToastAndroid.showWithGravityAndOffset(
+        'Recording not completed. Hang in there!',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+        25,
+        50
+      )
+    } else {
+      recordings.forEach(async (ele, index) => {
+        if (ele.file != "") {
 
-        const audioFile = {
-          uri: ele?.file,
-          name: ele?.file,
-          type: "video/3gp"
+          const audioFile = {
+            uri: ele?.file,
+            name: ele?.file,
+            type: "video/3gp"
+          }
+          payload.append(ele?.key, audioFile)
         }
-        payload.append(ele?.key, audioFile)
-      }
 
-      if (index == 6) {
+        if (index == 6) {
 
-        try {
-          setTimeout(async () => {
-            if (newlyCreatedPatientLungsId == null) {
-              payload.append("patient", newlyCreatedPatientId)
-              payload.append("doctor", user?.id)
-              sessionNo && payload.append("session", "session " + sessionNo)
-              
-              
-              const res = await LungXinstance.put("/api/lung_audio/", payload, {
-                headers: {
-                  'content-type': 'multipart/form-data'
-                }
-              })
-              setNewlyCreatedPatientLungsId(res?.data?.id)
-            } else {
-              payload.append("patient", newlyCreatedPatientId)
-              payload.append("doctor_id", user?.id)
-              payload.append("id", newlyCreatedPatientLungsId)
-              sessionNo && payload.append("session", "session " + sessionNo)
-             
-             
-              try {
-                LungXinstance.patch("/api/lung_audio/", payload, {
+          try {
+            setTimeout(async () => {
+              if (newlyCreatedPatientLungsId == null) {
+                payload.append("patient", newlyCreatedPatientId)
+                payload.append("doctor", user?.id)
+                sessionNo && payload.append("session", "session " + sessionNo)
+
+
+                const res = await LungXinstance.put("/api/lung_audio/", payload, {
                   headers: {
                     'content-type': 'multipart/form-data'
                   }
-                }).then(res => { setNewlyCreatedPatientLungsId(res?.data?.id) }).catch(err => console.log(err))
+                })
+                setNewlyCreatedPatientLungsId(res?.data?.id)
+              } else {
+                payload.append("patient", newlyCreatedPatientId)
+                payload.append("doctor_id", user?.id)
+                payload.append("id", newlyCreatedPatientLungsId)
+                sessionNo && payload.append("session", "session " + sessionNo)
 
-              } catch (error) {
-                console.log(error)
+
+                try {
+                  LungXinstance.patch("/api/lung_audio/", payload, {
+                    headers: {
+                      'content-type': 'multipart/form-data'
+                    }
+                  }).then(res => { setNewlyCreatedPatientLungsId(res?.data?.id) }).catch(err => console.log(err))
+
+                } catch (error) {
+                  console.log(error)
+                }
               }
-            }
-            if (EditAnteriorRecTag == "Edit Anterior Rec Tag") {
-              navigation.push("Anterior Tagging", {
-                EditAnteriorRecTag: EditAnteriorRecTag
-              })
-            } else {
-              navigation.navigate("Posterior Recording");
-            }
-          }, 2000)
+              if (EditAnteriorRecTag == "Edit Anterior Rec Tag") {
+                navigation.push("Anterior Tagging", {
+                  EditAnteriorRecTag: EditAnteriorRecTag
+                })
+              } else {
+                navigation.navigate("Posterior Recording");
+              }
+            }, 2000)
 
-        } catch (error) {
-          console.log("eoorr------------------------------")
-          console.log(error)
+          } catch (error) {
+            console.log("eoorr------------------------------")
+            console.log(error)
+          }
         }
-      }
-    })
-
+      })
+    }
   }
 
   async function playSound(id) {
@@ -157,7 +166,7 @@ export default function AnteriorRecording({ route, navigation }) {
 
   async function toggleSound(id) {
     try {
-
+     
       setPortionOnFocus(id)
       setIsFoucued(true)
       if (currentSoundId !== null && currentSoundId === id) {
@@ -308,12 +317,21 @@ export default function AnteriorRecording({ route, navigation }) {
                 <Pressable key={(() => Math.random())()}
                   disabled={isPlaying || (isRecording && portionOnFocus !== recordingLine.id)}
                   style={[styles.button_wrapper, recordingLine.style]}
-                  onPress={() => !isRecording ? startRecording(recordingLine.id, count, setCount) : (() => { setIsRecording(false); stopRecording(recordingLine.id) })()}
+                  onPress={() => {
+                    !isRecording ? startRecording(recordingLine.id, count, setCount) :
+                      ToastAndroid.showWithGravityAndOffset(
+                        'Recording not completed. Hang in there!',
+                        ToastAndroid.SHORT,
+                        ToastAndroid.BOTTOM,
+                        25,
+                        50
+                      );
+                  }}
                 >
                   {/* {btnState[index] && <Image style={{...styles.backimg,}} source={testdel}/>}  */}
-                  {portionOnFocus == index && 
-                  <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }}/>
-                  // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
+                  {portionOnFocus == index &&
+                    <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }}/>
+                    // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
                   }
 
                   {count === 0 ?
@@ -336,9 +354,9 @@ export default function AnteriorRecording({ route, navigation }) {
               :
               <>
                 <Pressable disabled={isRecording} onPress={() => toggleSound(index)} style={[recordingLine.style, styles.button_wrapper]} key={(() => Math.random())()}>
-                  {portionOnFocus == index && 
-                  <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }}/>
-                  // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
+                  {portionOnFocus == index &&
+                    <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }}/>
+                    // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
                   }
 
                   {btnState[index] && portionOnFocus == index && isRecording ?
@@ -370,7 +388,7 @@ export default function AnteriorRecording({ route, navigation }) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
-};
+  };
 
 
   return (
@@ -551,7 +569,7 @@ const rereording = StyleSheet.create({
     color: "red"
 
   },
-  
+
 })
 
 

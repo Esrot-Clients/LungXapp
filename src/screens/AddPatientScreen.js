@@ -133,7 +133,7 @@ export default function AddPatientScreen({ route, navigation }) {
       id: existedPatientId,
       doctor_id: user.id
     }
-    console.log("payload=------of geting old values done sent-------------")
+    // console.log("payload=------of geting old values done sent-------------")
     if (!existedPatientId) {
       setloading(false)
       return null

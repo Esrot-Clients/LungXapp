@@ -152,7 +152,7 @@ export default function OverallReport({ navigation, route }) {
               ele?.options?.map(option => (
                 option.isChecked &&
                 <>
-                  <Text key={(() => Math.random())()} style={lungs.tags}>{option.position}</Text>
+                  <Text key={(() => Math.random())()} style={{ ...lungs.tags, color: option?.id == 5 ? colors.black : "#990099" }}>{option.position}</Text>
                 </>
               ))
 
@@ -186,7 +186,7 @@ export default function OverallReport({ navigation, route }) {
               ele.options?.map(option => (
                 option.isChecked &&
                 <>
-                  <Text key={(() => Math.random())()} style={lungs.tags}>{option.position}</Text>
+                  <Text key={(() => Math.random())()} style={{ ...lungs.tags, color: option?.id == 5 ? colors.black : "#990099" }}>{option.position}</Text>
                 </>
               ))
             )

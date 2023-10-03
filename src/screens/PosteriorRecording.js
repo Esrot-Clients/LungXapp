@@ -47,46 +47,56 @@ export default function PosteriorRecording({ navigation, route }) {
   }
 
   async function handlePatientPosteriorRecordings() {
-    const payload = new FormData()
 
-    recordingsPosterior.forEach(async (ele, index) => {
-      if (ele.file != "") {
-        const audioFile = {
-          uri: ele?.file,
-          name: ele?.file,
-          type: "video/3gp"
+    if (isRecording) {
+      ToastAndroid.showWithGravityAndOffset(
+        'Recording not completed. Hang in there!',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+        25,
+        50
+      )
+    } else {
+      const payload = new FormData()
+      recordingsPosterior.forEach(async (ele, index) => {
+        if (ele.file != "") {
+          const audioFile = {
+            uri: ele?.file,
+            name: ele?.file,
+            type: "video/3gp"
+          }
+          payload.append(ele?.key, audioFile)
         }
-        payload.append(ele?.key, audioFile)
-      }
-      if (index == 5) {
-        payload.append("patient", newlyCreatedPatientId)
-        payload.append("doctor", user?.id)
-        payload.append("id", newlyCreatedPatientLungsId)
+        if (index == 5) {
+          payload.append("patient", newlyCreatedPatientId)
+          payload.append("doctor", user?.id)
+          payload.append("id", newlyCreatedPatientLungsId)
 
-        
-        try {
-          setTimeout(async () => {
-            const res = await LungXinstance.patch("/api/lung_audio/", payload, {
-              headers: {
-                'content-type': 'multipart/form-data'
-              }
-            })
 
-            if (EditPosteriorRecTag == "Edit Posterior Rec Tag") {
-              navigation.push("Posterior Tagging", {
-                EditPosteriorRecTag: EditPosteriorRecTag
+          try {
+            setTimeout(async () => {
+              const res = await LungXinstance.patch("/api/lung_audio/", payload, {
+                headers: {
+                  'content-type': 'multipart/form-data'
+                }
               })
-            } else {
-              navigation.navigate("Anterior Tagging");
-            }
-          }, 2000)
 
-        } catch (error) {
-          console.log("eoorr------------------------------")
-          console.log(error)
+              if (EditPosteriorRecTag == "Edit Posterior Rec Tag") {
+                navigation.push("Posterior Tagging", {
+                  EditPosteriorRecTag: EditPosteriorRecTag
+                })
+              } else {
+                navigation.navigate("Anterior Tagging");
+              }
+            }, 2000)
+
+          } catch (error) {
+            console.log("eoorr------------------------------")
+            console.log(error)
+          }
         }
-      }
-    })
+      })
+    }
 
   }
 
@@ -185,7 +195,7 @@ export default function PosteriorRecording({ navigation, route }) {
             Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
           );
           const timerInterval = setInterval(() => {
-            setRecordingTime((prevTime) => prevTime -1);
+            setRecordingTime((prevTime) => prevTime - 1);
           }, 1000);
           // set Portion On Focus for the display of true  re-recording section
           setPortionOnFocus(id)
@@ -284,7 +294,16 @@ export default function PosteriorRecording({ navigation, route }) {
                 <Pressable key={(() => Math.random())()}
                   disabled={isPlaying || (isRecording && portionOnFocus !== recordingLine.id)}
                   style={[recordingLine.style, styles.button_wrapper]}
-                  onPress={() => !isRecording ? startRecording(recordingLine.id, count, setCount) : (() => { setIsRecording(false); stopRecording(recordingLine.id) })()}
+                  onPress={() => {
+                    !isRecording ? startRecording(recordingLine.id, count, setCount) :
+                      ToastAndroid.showWithGravityAndOffset(
+                        'Recording not completed. Hang in there!',
+                        ToastAndroid.SHORT,
+                        ToastAndroid.BOTTOM,
+                        25,
+                        50
+                      )
+                  }}
                 >
                   {/* {btnState[index+7] && <Image style={styles.backimg} source={testdel}/>}  */}
                   {portionOnFocus == index + 7 &&
@@ -337,10 +356,6 @@ export default function PosteriorRecording({ navigation, route }) {
 
               </>
           }
-
-
-
-
         </>
       );
     });
@@ -350,7 +365,7 @@ export default function PosteriorRecording({ navigation, route }) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
-};
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -383,19 +398,19 @@ export default function PosteriorRecording({ navigation, route }) {
         />
       </View>
 
-        <View
-          style={{
-            marginBottom: 30,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            flex: 1,
-            marginTop: 20,
-            width: "94%",
-          }}
-        >
-          <View style={{ width: metrics.screenWidth * 0.4, left: 5 }}>
+      <View
+        style={{
+          marginBottom: 30,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          flex: 1,
+          marginTop: 20,
+          width: "94%",
+        }}
+      >
+        <View style={{ width: metrics.screenWidth * 0.4, left: 5 }}>
           {EditPosteriorRecTag ?
-          <></>:
+            <></> :
             <button.BtnContain
               label="Anterior"
               color="#F6FBF9"
@@ -403,25 +418,34 @@ export default function PosteriorRecording({ navigation, route }) {
               labelColor={colors.green}
               iconLeft={"arrow-left"}
               onPress={() => {
-                navigation.goBack();
+                isRecording ?
+                  ToastAndroid.showWithGravityAndOffset(
+                    'Recording not completed. Hang in there!',
+                    ToastAndroid.SHORT,
+                    ToastAndroid.BOTTOM,
+                    25,
+                    50
+                  )
+                  :
+                  navigation.goBack();
               }}
             />
           }
-          </View>
-          <View style={{ width: metrics.screenWidth * 0.49 }}>
-            <button.BtnContain
-              label={EditPosteriorRecTag ?"Posterior Tagging":"Continue"}
-              color="#F6FBF9"
-              labelsize={12}
-              labelColor={colors.green}
-              icon={"arrow-right"}
-              onPress={() => {
-                //   handlePatientDetailSubmission();
-                handlePatientPosteriorRecordings()
-              }}
-            />
-          </View>
         </View>
+        <View style={{ width: metrics.screenWidth * 0.49 }}>
+          <button.BtnContain
+            label={EditPosteriorRecTag ? "Posterior Tagging" : "Continue"}
+            color="#F6FBF9"
+            labelsize={12}
+            labelColor={colors.green}
+            icon={"arrow-right"}
+            onPress={() => {
+              //   handlePatientDetailSubmission();
+              handlePatientPosteriorRecordings()
+            }}
+          />
+        </View>
+      </View>
     </ScrollView>
   );
 }

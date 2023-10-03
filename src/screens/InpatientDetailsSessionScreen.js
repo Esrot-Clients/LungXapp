@@ -237,7 +237,7 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
            
                 {opt == "" && patientLungsDetail?.[0]?.[recordingLine.lungs_tags] &&
                   JSON.parse(patientLungsDetail?.[0]?.[recordingLine?.lungs_tags])?.options?.map(res =>
-                    <Text key={(() => Math.random())()} style={lungs.tags}>{res?.position}</Text>
+                    <Text key={(() => Math.random())()} style={{...lungs.tags,  color:res?.id == 5? colors.black:"#990099"}}>{res?.position}</Text>
                   )
                 }
           </Pressable>
@@ -261,7 +261,7 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
             {opt == "" && 
               patientLungsDetail?.[0]?.[recordingLine.lungs_tags]
               && JSON.parse(patientLungsDetail?.[0]?.[recordingLine?.lungs_tags])?.options?.map(res =>
-                <Text key={(() => Math.random())()} style={lungs.tags}>{res?.position}</Text>
+                <Text key={(() => Math.random())()} style={{...lungs.tags,  color:res?.id == 5? colors.black:"#990099"}}>{res?.position}</Text>
               )
             }
           </Pressable>

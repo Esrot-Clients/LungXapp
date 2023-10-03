@@ -21,51 +21,16 @@ import LungXinstance from "../api/server";
 import ProgressStep from "../components/Molecules/ProgressStep";
 
 
-const SymptomsData = [
-  {
-    id: 1,
-    position: "Coarse crackle",
-    isChecked: false,
-  },
-  {
-    id: 2,
-    position: "Fine crackle",
-    isChecked: false,
-  },
-  {
-    id: 3,
-    position: "Ronchi",
-    isChecked: false,
-  },
-  {
-    id: 4,
-    position: "Wheeze",
-    isChecked: false,
-  },
-
-  {
-    id: 5,
-    position: "Normal",
-    isChecked: false,
-  },
-
-  {
-    id: 6,
-    position: "All",
-    isChecked: false,
-  },
-]
 
 
 export default function PosteriorTagging({ navigation, route }) {
   const EditPosteriorRecTag = route?.params?.EditPosteriorRecTag
-  const { recordingsPosterior, setRecordingsPosterior, PosteriorTagging, setPosteriorTagging, handlePosteriorfiltering, newlyCreatedPatientLungsId, newlyCreatedPatientId } = useContext(AddPatientContext)
+  const { recordingsPosterior, setRecordingsPosterior, PosteriorTagging, setPosteriorTagging, handlePosteriorfiltering, newlyCreatedPatientLungsId, newlyCreatedPatientId,settagsPosterior,tagsposterior } = useContext(AddPatientContext)
   const { user } = useContext(AuthContext);
 
   const [currrentStep, setCurrentStep] = useState(3);
 
   const [alltagVisible, setallTagVisible] = useState(false)
-  const [tags, settags] = useState(SymptomsData)
   const [activeLungsection, setActiveLungsection] = useState(null)
   const [showSoundsPopup, setShowSoundsPopup] = useState(false)
   const [showWarningPopup, setShowWarningPopup] = useState(false)
@@ -172,17 +137,31 @@ export default function PosteriorTagging({ navigation, route }) {
   }
 
   const handleTaggingAllAnteriorPosition = (symptomsName, state) => {
-    const newtag = tags.map((symptoms) => {
-      if (symptoms.position === symptomsName && state) return { ...symptoms, isChecked: true };
-      if (symptoms.position === symptomsName && !state) return { ...symptoms, isChecked: false };
+    const newtag = tagsposterior.map((symptoms) => {
+      if (symptomsName === "All" && state) {
+        return { ...symptoms, isChecked: true}
+      }
+      else if (symptoms.position == symptomsName) {
+        return { ...symptoms, isChecked: !symptoms.isChecked }
+      }
+       else if (symptoms.position == symptomsName && !state) {
+        return { ...symptoms, isChecked: false }
+      }
       return symptoms;
     });
-    settags(newtag);
+    settagsPosterior(newtag);
 
     const newAnteriorTagging = PosteriorTagging.map((position) => {
       const newAnteriorOption = position.options.map((symptoms) => {
-        if (symptoms.position === symptomsName && state) return { ...symptoms, isChecked: true };
-        if (symptoms.position === symptomsName && !state) return { ...symptoms, isChecked: false };
+        if (symptomsName === "All" && state) {
+          return { ...symptoms, isChecked: true }
+        }
+        else if (symptoms.position === symptomsName && state) {
+          return { ...symptoms, isChecked: !symptoms.isChecked }
+        }
+        else if (symptoms.position === symptomsName && !state) {
+          return { ...symptoms, isChecked: false }
+        }
         return symptoms;
       });
       return { ...position, options: newAnteriorOption };
@@ -191,13 +170,13 @@ export default function PosteriorTagging({ navigation, route }) {
   };
 
   const handleTagDiscarding = () => {
-    const newtags = tags.map(
+    const newtags = tagsposterior.map(
       symptoms => {
         return { ...symptoms, isChecked: false }
       }
 
     )
-    settags(newtags)
+    settagsPosterior(newtags)
     const newAnteriorTagging = PosteriorTagging.map((position) => {
       const newOptions = position.options.map((option) => {
         return { ...option, isChecked: false };
@@ -211,12 +190,7 @@ export default function PosteriorTagging({ navigation, route }) {
   //Anterior Tagging controller runs on  input changes (checkboxes)
 
   const handleAnteriorPositionTagging = (positionid, optionid, state) => {
-    console.log("handleAnteriorPositionTagging---positionid----------------------a-----")
-    // console.log(positionid)
-    console.log("handleAnteriorPositionTagging----optionid------------------------b---")
-    // console.log(optionid)
-    // console.log(state)
-
+   
     const newAnteriorTagging = PosteriorTagging.map((position) => {
       if (position.id === positionid && optionid != 6) {
         const newOptions = position.options.map((option) => {
@@ -338,7 +312,7 @@ export default function PosteriorTagging({ navigation, route }) {
                     bottom: 0,
                   }}
                 >
-                  {tags.length > 0 && tags.map((symptom, index) => (
+                  {tagsposterior.length > 0 && tagsposterior.map((symptom, index) => (
                     <View key={(() => Math.random())()}
                       style={{
                         alignItems: "flex-start",

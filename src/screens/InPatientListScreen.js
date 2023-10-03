@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, FlatList } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PatientDetailsCard from '../components/Molecules/PatientDetailsCard';
 
 import * as Button from '../components/Atoms/Button';
@@ -11,12 +11,14 @@ import { useQuery } from 'react-query';
 import patientListApi from '../api/patientList';
 import { useIsFocused, useFocusEffect } from '@react-navigation/native';
 import LungXinstance from '../api/server';
+import { AddPatientContext } from '../context/AddPatientContext';
 
 export default function InPatientDetails({ navigation }) {
 
   // const {data}=useQuery("getPatientList",patientListApi.getPatientList)
 
   const focused = useIsFocused()
+  const { resetStateObj } = useContext(AddPatientContext);
 
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([])
@@ -65,7 +67,8 @@ export default function InPatientDetails({ navigation }) {
       <FlatList
         showsVerticalScrollIndicator={false}
         data={data}
-        renderItem={({ item }) => <PatientDetailsCard item={item} showView={true} onPress={() => navigation.navigate('In Patient Session Details', { item })} onPressEdit={() => navigation.navigate('Add Patient', { existedPatientId: item.id, existedPatientHealthId: item.patienthealthdata?.[item.patienthealthdata?.length - 1].id })} />}
+        renderItem={({ item }) => <PatientDetailsCard item={item} showView={true} onPress={() => navigation.navigate('In Patient Session Details', { item })} 
+        onPressEdit={() =>{resetStateObj(); navigation.navigate('Add Patient', { existedPatientId: item.id, existedPatientHealthId: item.patienthealthdata?.[item.patienthealthdata?.length - 1].id })}} />}
         // keyExtractor={item => item.toString()}
         // ListHeaderComponent={()=> <SearchBar/>}
         ListFooterComponent={() => (
