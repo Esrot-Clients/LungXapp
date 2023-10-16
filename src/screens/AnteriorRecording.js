@@ -20,7 +20,6 @@ import LoadingScreen from "../components/Atoms/LoadingScreen";
 import { FontAwesome } from '@expo/vector-icons';
 import ProgressStep from "../components/Molecules/ProgressStep";
 
-// import RadialGradient50 from "../components/Atoms/RadialGradient";
 
 export default function AnteriorRecording({ route, navigation }) {
   const EditAnteriorRecTag = route?.params?.EditAnteriorRecTag
@@ -46,10 +45,11 @@ export default function AnteriorRecording({ route, navigation }) {
   const payload = new FormData()
   const [recordingTime, setRecordingTime] = useState(10);
 
+  const AudioPlayer = useRef(new Audio.Sound());
+
 
   async function handlePatientAnteriorRecordings() {
-
-    if (isRecording) {
+    if (isRecording ) {
       ToastAndroid.showWithGravityAndOffset(
         'Recording not completed. Hang in there!',
         ToastAndroid.SHORT,
@@ -57,69 +57,90 @@ export default function AnteriorRecording({ route, navigation }) {
         25,
         50
       )
+    } else if ( isPlaying) {
+      ToastAndroid.showWithGravityAndOffset(
+        'The audio is currently playing. Please wait for it to finish.',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+        25,
+        50
+      )
     } else {
-      recordings.forEach(async (ele, index) => {
-        if (ele.file != "") {
-
-          const audioFile = {
-            uri: ele?.file,
-            name: ele?.file,
-            type: "video/3gp"
-          }
-          payload.append(ele?.key, audioFile)
-        }
-
-        if (index == 6) {
-
-          try {
-            setTimeout(async () => {
-              if (newlyCreatedPatientLungsId == null) {
-                payload.append("patient", newlyCreatedPatientId)
-                payload.append("doctor", user?.id)
-                sessionNo && payload.append("session", "session " + sessionNo)
-
-
-                const res = await LungXinstance.put("/api/lung_audio/", payload, {
-                  headers: {
-                    'content-type': 'multipart/form-data'
-                  }
-                })
-                setNewlyCreatedPatientLungsId(res?.data?.id)
-              } else {
-                payload.append("patient", newlyCreatedPatientId)
-                payload.append("doctor_id", user?.id)
-                payload.append("id", newlyCreatedPatientLungsId)
-                sessionNo && payload.append("session", "session " + sessionNo)
-
-
-                try {
-                  LungXinstance.patch("/api/lung_audio/", payload, {
-                    headers: {
-                      'content-type': 'multipart/form-data'
-                    }
-                  }).then(res => { setNewlyCreatedPatientLungsId(res?.data?.id) }).catch(err => console.log(err))
-
-                } catch (error) {
-                  console.log(error)
-                }
-              }
-              if (EditAnteriorRecTag == "Edit Anterior Rec Tag") {
-                navigation.push("Anterior Tagging", {
-                  EditAnteriorRecTag: EditAnteriorRecTag
-                })
-              } else {
-                navigation.navigate("Posterior Recording");
-              }
-            }, 2000)
-
-          } catch (error) {
-            console.log("eoorr------------------------------")
-            console.log(error)
-          }
-        }
-      })
+      if (EditAnteriorRecTag == "Edit Anterior Rec Tag") {
+        navigation.push("Anterior Tagging", {
+          EditAnteriorRecTag: EditAnteriorRecTag
+        })
+      } else {
+        navigation.navigate("Posterior Recording");
+      }
     }
   }
+
+  async function handlePatientAnteriorRecordingsNew(key, file) {
+    const audioFile = {
+      uri: file,
+      name: file,
+      type: "video/3gp"
+    }
+    payload.append(key, audioFile)
+
+    try {
+      if (newlyCreatedPatientLungsId == null) {
+        payload.append("patient", newlyCreatedPatientId)
+        payload.append("doctor", user?.id)
+        sessionNo && payload.append("session", "session " + sessionNo)
+
+        const res = await LungXinstance.put("/api/lung_audio/", payload, {
+          headers: {
+            'content-type': 'multipart/form-data'
+          }
+        })
+        setNewlyCreatedPatientLungsId(res?.data?.id)
+
+        recordings.forEach(async (recordingss, index) => {
+          if (recordingss.key == key) {
+            const uri = `https://lung.thedelvierypointe.com${res?.data?.[key]}`
+            // const { sound, status } = await Audio.Sound.createAsync({ uri: uri });
+            recordingss.sound = "sound";
+            recordingss.file = uri;
+          }
+        })
+
+      }
+      else {
+        payload.append("patient", newlyCreatedPatientId)
+        payload.append("doctor_id", user?.id)
+        payload.append("id", newlyCreatedPatientLungsId)
+        sessionNo && payload.append("session", "session " + sessionNo)
+
+        const res = await LungXinstance.patch("/api/lung_audio/", payload, {
+          headers: {
+            'content-type': 'multipart/form-data'
+          }
+        })
+        setNewlyCreatedPatientLungsId(res?.data?.id)
+
+
+        recordings.forEach(async (recordingss, index) => {
+          if (recordingss.key == key) {
+            const uri = `https://lung.thedelvierypointe.com${res?.data?.[recordingss.key]}`
+            // const { sound, status } = await Audio.Sound.createAsync({ uri: uri });
+            recordingss.sound = "sound";
+            recordingss.file = uri;
+          }
+        })
+
+      }
+      setTimeout(() => {
+        setRecordText("");
+      }, 1000)
+
+    } catch (error) {
+      console.log("eoorr-----------------------------", error)
+    }
+
+  }
+
 
   async function playSound(id) {
     try {
@@ -127,36 +148,48 @@ export default function AnteriorRecording({ route, navigation }) {
         console.log("current sound is not null")
         await stopSound();
       }
-      const sound = recordings.find((recording) => recording.id === id).sound;
-      if (sound) {
-        btnState[id] = "recording"
-        await sound.playAsync();
-        setCurrentSoundId(id);
-      } else {
-        console.log('No sound found.')
-      }
 
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
-          sound.stopAsync();
-          setCurrentSoundId(null);
-          setIsPlaying(false)
+      const file = recordings.find((recording) => recording.id === id).file;
+      await AudioPlayer.current.loadAsync({ uri: file }, {}, true);
+
+      const playerStatus = await AudioPlayer.current.getStatusAsync();
+
+      if (playerStatus.isLoaded) {
+        if (playerStatus.isPlaying === false) {
+          btnState[id] = "recording"
+          AudioPlayer.current.playAsync();
+          setCurrentSoundId(id);
         }
-      });
+      }
+      AudioPlayer.current.setOnPlaybackStatusUpdate(handlePlaybackStatusUpdate);
+
 
     } catch (error) {
       console.error("Failed to play sound", error);
+      ToastAndroid.showWithGravityAndOffset(
+        'Failed to play sound!',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+        25,
+        50
+      )
+    }
+  }
+
+  async function handlePlaybackStatusUpdate(status) {
+    if (status.isLoaded && !status.isPlaying && status.didJustFinish) {
+      await AudioPlayer.current.unloadAsync();
+      setCurrentSoundId(null);
+      setIsPlaying(false)
     }
   }
 
   async function stopSound() {
     try {
-      const recordingLine = recordings.find(
-        (recording) => recording.id === currentSoundId
-      );
+      const playerStatus = await AudioPlayer.current.getStatusAsync();
 
-      if (recordingLine && recordingLine.sound) {
-        await recordingLine.sound.stopAsync();
+      if (playerStatus.isLoaded === true) {
+        await AudioPlayer.current.unloadAsync()
         setCurrentSoundId(null);
       }
     } catch (error) {
@@ -166,7 +199,7 @@ export default function AnteriorRecording({ route, navigation }) {
 
   async function toggleSound(id) {
     try {
-     
+
       setPortionOnFocus(id)
       setIsFoucued(true)
       if (currentSoundId !== null && currentSoundId === id) {
@@ -182,8 +215,8 @@ export default function AnteriorRecording({ route, navigation }) {
   }
 
 
-
   async function startRecording(id, count, setCount, reRec) {
+
     if (count === 0) {
       setCount(1)
       setPortionOnFocus(id)
@@ -214,7 +247,7 @@ export default function AnteriorRecording({ route, navigation }) {
             Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
           );
           const timerInterval = setInterval(() => {
-            setRecordingTime((prevTime) => prevTime -1);
+            setRecordingTime((prevTime) => prevTime - 1);
           }, 1000);
           // set Portion On Focus for the display of true  re-recording section
           setPortionOnFocus(id)
@@ -259,36 +292,23 @@ export default function AnteriorRecording({ route, navigation }) {
   }
 
   async function stopRecording(id) {
+
     const recording = recordingRef.current;
     recordingRef.current = null;
 
     if (recording) {
-      clearTimeout(recordingTimeout); // Clear the recording timeout
+      clearTimeout(recordingTimeout);
 
       try {
         await recording.stopAndUnloadAsync();
 
         const { sound, status } = await recording.createNewLoadedSoundAsync();
+        var file = recording.getURI()
+        var recKey = recordings[id].key;
         if (typeof id != "number") {
-          const updatedRecordings = [...recordings];
-          updatedRecordings.push({
-            id: recordings.length + 1,
-            sound: sound,
-            duration: getDurationFormatted(status.durationMillis),
-            file: recording.getURI(),
-          });
-          setRecordings(updatedRecordings);
-          setMessage("");
+          await handlePatientAnteriorRecordingsNew(recKey, file)
         } else {
-          recordings.forEach((recordingss, index) => {
-            if (recordingss.id == id) {
-              recordingss.sound = sound;
-              recordingss.duration = getDurationFormatted(status.durationMillis);
-              recordingss.file = recording.getURI();
-            }
-          });
-
-          setRecordText("");
+          await handlePatientAnteriorRecordingsNew(recKey, file)
         }
       } catch (err) {
         console.error("Failed to stop recording", err);
@@ -308,7 +328,6 @@ export default function AnteriorRecording({ route, navigation }) {
   function getRecordingLines() {
     return recordings.map((recordingLine, index) => {
       const [count, setCount] = useState(0);
-
       return (
         <>
           {
@@ -330,7 +349,7 @@ export default function AnteriorRecording({ route, navigation }) {
                 >
                   {/* {btnState[index] && <Image style={{...styles.backimg,}} source={testdel}/>}  */}
                   {portionOnFocus == index &&
-                    <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }}/>
+                    <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }} />
                     // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
                   }
 
@@ -355,7 +374,7 @@ export default function AnteriorRecording({ route, navigation }) {
               <>
                 <Pressable disabled={isRecording} onPress={() => toggleSound(index)} style={[recordingLine.style, styles.button_wrapper]} key={(() => Math.random())()}>
                   {portionOnFocus == index &&
-                    <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }}/>
+                    <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }} />
                     // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
                   }
 
@@ -411,6 +430,10 @@ export default function AnteriorRecording({ route, navigation }) {
         </Pressable>
       </View>
 
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, }}>
+        <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+        <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
+      </View>
 
       <View style={lungs.wrapper}>
         <View style={lungs.btn_wrapper}>

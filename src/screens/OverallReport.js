@@ -108,7 +108,7 @@ export default function OverallReport({ navigation, route }) {
         setCurrentSoundId(null)
       } else {
         if (sound.isPlaying) {
-          sound.stopAsync()
+          await sound.stopAsync()
         }
         await sound.loadAsync({
           uri
@@ -212,13 +212,14 @@ export default function OverallReport({ navigation, route }) {
         }
       });
       if (response.data.status == true) {
-        setTimeout(() => {
-          setloading(false)
-          setShowWarningPopup(true)
-           // navigation.navigate("Add Patient Home")
-         
-        }, 10000);
-        handleClearAddPatientData()
+        // setTimeout(() => {
+        //   setloading(false)
+        //   setShowWarningPopup(true)
+        // }, 10000);
+        // handleClearAddPatientData()
+        resetStateObj();
+        setloading(false)
+        setShowWarningPopup(true)
 
       } else {
         setloading(false)
@@ -335,11 +336,16 @@ export default function OverallReport({ navigation, route }) {
             >
               <View
                 style={styles.antRecViewEditBtn}>
-                <Text style={{ fontFamily: "Montserrat-Medium", color: "#fff" ,fontSize:13}}>
+                <Text style={{ fontFamily: "Montserrat-Medium", color: "#fff", fontSize: 13 }}>
                   Edit
                 </Text>
               </View>
             </TouchableOpacity>
+          </View>
+
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 10 }}>
+            <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+            <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
           </View>
 
           <View style={lungs.wrapper}>
@@ -369,11 +375,16 @@ export default function OverallReport({ navigation, route }) {
             >
               <View
                 style={styles.antRecViewEditBtn}>
-                <Text style={{ fontFamily: "Montserrat-Medium", color: "#fff", fontSize:13 }}>
+                <Text style={{ fontFamily: "Montserrat-Medium", color: "#fff", fontSize: 13 }}>
                   Edit
                 </Text>
               </View>
             </TouchableOpacity>
+          </View>
+
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 10 }}>
+            <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
+            <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
           </View>
 
           <View style={lungs.wrapper}>

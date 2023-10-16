@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Pressable, Image } from "react-native";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect , useRef} from "react";
 
 import * as Button from "../components/Atoms/Button";
 import metrics from "../constants/layout";
@@ -19,14 +19,14 @@ import { useIsFocused } from "@react-navigation/native";
 import { AuthContext } from "../context/AuthContext";
 import LungXinstance from "../api/server";
 import ProgressStep from "../components/Molecules/ProgressStep";
-
-
-
+import { Audio } from "expo-av";
 
 export default function PosteriorTagging({ navigation, route }) {
   const EditPosteriorRecTag = route?.params?.EditPosteriorRecTag
-  const { recordingsPosterior, setRecordingsPosterior, PosteriorTagging, setPosteriorTagging, handlePosteriorfiltering, newlyCreatedPatientLungsId, newlyCreatedPatientId,settagsPosterior,tagsposterior } = useContext(AddPatientContext)
+  const { recordingsPosterior, setRecordingsPosterior, PosteriorTagging, setPosteriorTagging, handlePosteriorfiltering, newlyCreatedPatientLungsId, newlyCreatedPatientId, settagsPosterior, tagsposterior } = useContext(AddPatientContext)
   const { user } = useContext(AuthContext);
+
+  const AudioPlayer = useRef(new Audio.Sound());
 
   const [currrentStep, setCurrentStep] = useState(3);
 
@@ -40,9 +40,6 @@ export default function PosteriorTagging({ navigation, route }) {
   useEffect(() => {
     setShowWarningPopup(false)
   }, [isFocused])
-
-
-
 
 
   function getRecordingLines() {
@@ -73,7 +70,6 @@ export default function PosteriorTagging({ navigation, route }) {
     });
   }
 
-  // recorded sound section
 
   const [currentSoundId, setCurrentSoundId] = useState(null);
 
@@ -84,27 +80,41 @@ export default function PosteriorTagging({ navigation, route }) {
         console.log("current sound is not null")
         await stopSound();
       }
-      const sound = recordingsPosterior.find((recording) => recording.id === id).sound;
-      if (sound) {
-        await sound.playAsync();
-        setCurrentSoundId(id);
-      } else {
-        console.log('No sound found.')
+     
+      const file = recordingsPosterior.find((recording) => recording.id === id).file;
+      await AudioPlayer.current.loadAsync({ uri: file }, {}, true);
+
+      const playerStatus = await AudioPlayer.current.getStatusAsync();
+
+      if (playerStatus.isLoaded) {
+        if (playerStatus.isPlaying === false) {
+         AudioPlayer.current.playAsync();
+         setCurrentSoundId(id);
+        }
       }
+      AudioPlayer.current.setOnPlaybackStatusUpdate(handlePlaybackStatusUpdate);
     } catch (error) {
       console.error("Failed to play sound", error);
     }
   }
 
+  async function handlePlaybackStatusUpdate(status) {
+    if (status.isLoaded && !status.isPlaying && status.didJustFinish) {
+      await AudioPlayer.current.unloadAsync();
+      setCurrentSoundId(null);
+    }
+  }
+
   async function stopSound() {
     try {
-      const recordingLine = recordingsPosterior.find(
-        (recording) => recording.id === currentSoundId
-      );
-      if (recordingLine && recordingLine.sound) {
-        await recordingLine.sound.stopAsync();
+      const playerStatus = await AudioPlayer.current.getStatusAsync();
+
+      if (playerStatus.isLoaded === true) {
+        await AudioPlayer.current.unloadAsync()
         setCurrentSoundId(null);
       }
+
+      
     } catch (error) {
       console.error("Failed to stop sound", error);
     }
@@ -139,12 +149,12 @@ export default function PosteriorTagging({ navigation, route }) {
   const handleTaggingAllAnteriorPosition = (symptomsName, state) => {
     const newtag = tagsposterior.map((symptoms) => {
       if (symptomsName === "All" && state) {
-        return { ...symptoms, isChecked: true}
+        return { ...symptoms, isChecked: true }
       }
       else if (symptoms.position == symptomsName) {
         return { ...symptoms, isChecked: !symptoms.isChecked }
       }
-       else if (symptoms.position == symptomsName && !state) {
+      else if (symptoms.position == symptomsName && !state) {
         return { ...symptoms, isChecked: false }
       }
       return symptoms;
@@ -190,7 +200,7 @@ export default function PosteriorTagging({ navigation, route }) {
   //Anterior Tagging controller runs on  input changes (checkboxes)
 
   const handleAnteriorPositionTagging = (positionid, optionid, state) => {
-   
+
     const newAnteriorTagging = PosteriorTagging.map((position) => {
       if (position.id === positionid && optionid != 6) {
         const newOptions = position.options.map((option) => {
@@ -218,7 +228,6 @@ export default function PosteriorTagging({ navigation, route }) {
     setPosteriorTagging(newAnteriorTagging);
   };
 
-  //Anterior Tagging controller runs on submit all inputs (checkboxes)
 
   return (
     <>
@@ -353,7 +362,10 @@ export default function PosteriorTagging({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 20 }}>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+        </View>
 
         <View style={lungsPosterior.wrapper}>
 
@@ -396,7 +408,7 @@ export default function PosteriorTagging({ navigation, route }) {
 
           <View style={{ width: metrics.screenWidth * 0.49, }}>
             <Button.BtnContain
-              label={EditPosteriorRecTag?"Continue to save":"Continue to report"}
+              label={EditPosteriorRecTag ? "Continue to save" : "Continue to report"}
               color="#F6FBF9"
               labelsize={12}
               labelColor={colors.green}
@@ -412,7 +424,7 @@ export default function PosteriorTagging({ navigation, route }) {
         <View style={listenRecordingsStyle.main}>
           <Text style={listenRecordingsStyle.title}>Recorded Sounds</Text>
           {listenRecordings()}
-          <Pressable onPress={() => setShowSoundsPopup(false)}>
+          <Pressable onPress={async() => { await stopSound();setShowSoundsPopup(false)}}>
             <Text style={listenRecordingsStyle.btn}>Close</Text>
           </Pressable>
         </View>
@@ -420,7 +432,7 @@ export default function PosteriorTagging({ navigation, route }) {
       <Modal visible={showWarningPopup} contentContainerStyle={containerStyle} onDismiss={() => setShowWarningPopup(false)}>
         <View style={warningStyle.main}>
           <Text style={warningStyle.title}>Confirm</Text>
-          <Text style={warningStyle.title2}>Continue to {EditPosteriorRecTag? "save" : "report"} ?</Text>
+          <Text style={warningStyle.title2}>Continue to {EditPosteriorRecTag ? "save" : "report"} ?</Text>
           <Text style={warningStyle.warn}>Rest all positions will auto tag to Normal</Text>
           <View style={warningStyle.btnWrapper}>
 

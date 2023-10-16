@@ -513,8 +513,8 @@ export default function AddPatientScreen({ route, navigation }) {
         recordings.forEach(async (recordingss, index) => {
           if (Data?.[recordingss.key] != null) {
             const uri = `https://lung.thedelvierypointe.com${Data?.[recordingss.key]}`
-            const { sound } = await Audio.Sound.createAsync({ uri: uri });
-            recordingss.sound = sound;
+            // const { sound } = await Audio.Sound.createAsync({ uri: uri });
+            recordingss.sound = "sound";
             recordingss.file = uri;
           }
         });
@@ -522,8 +522,8 @@ export default function AddPatientScreen({ route, navigation }) {
         recordingsPosterior.forEach(async (recordingss, index) => {
           if (Data?.[recordingss.key] != null) {
             const uri = `https://lung.thedelvierypointe.com${Data?.[recordingss.key]}`
-            const { sound } = await Audio.Sound.createAsync({ uri: uri });
-            recordingss.sound = sound;
+            // const { sound } = await Audio.Sound.createAsync({ uri: uri });
+            recordingss.sound = "sound";
             recordingss.file = uri;
           }
         });

@@ -1,13 +1,12 @@
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, } from 'react';
 import colors from '../constants/colors';
 import { SubTitle, Title } from '../components/Atoms/Typography';
 import metrics from '../constants/layout';
 import fonts from '../constants/fontsSize';
 import ComplaintsCard from '../components/Molecules/ComplaintsCard';
 import Textinput from '../components/Atoms/Textinput';
-// 
-
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Checkbox from 'expo-checkbox';
 import LungXinstance from '../api/server';
 import { useIsFocused } from '@react-navigation/native';
@@ -329,9 +328,15 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
 
 
       <View style={styles.symptomsDetails}>
+      <View style={{ flexDirection: "row", display: "flex", width: "100%" }}>
         <Title color={colors.green} size={fonts.font12}>
           Anterior Recordings and Tags
         </Title>
+        </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 20 }}>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
+        </View>
         <View style={lungs.wrapper}>
           <View style={lungs.btn_wrapper}>
             {getAnteriorRecordingLines()}
@@ -345,9 +350,15 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
       {/* lungsPosterior image and activeLungsection selector buttons */}
 
       <View style={styles.symptomsDetails}>
+      <View style={{ flexDirection: "row", display: "flex", width: "100%" }}>
         <Title color={colors.green} size={fonts.font12}>
           Posterior Recordings and Tags
         </Title>
+        </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 20 }}>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+        </View>
         <View style={lungsPosterior.wrapper}>
           <View style={lungsPosterior.btn_wrapper}>
             {getPosteriorRecordingLines()}
@@ -416,6 +427,7 @@ const styles = StyleSheet.create({
   },
   symptomsDetails: {
     display: "flex",
+    justifyContent: "center", alignItems: "center",
     width: metrics.screenWidth * 0.9,
     marginVertical: 8,
     borderRadius: 8,

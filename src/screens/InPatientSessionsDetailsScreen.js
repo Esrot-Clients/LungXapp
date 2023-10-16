@@ -29,12 +29,17 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
       <View style={styles.PatientDetailsContainer}>
         <TouchableOpacity disabled>
           <View style={{ flexDirection: 'row' }}>
-            <View>
-              <Typography.Title>Patient ID : {patientDetail?.[0]?.patient_code}</Typography.Title>
+            <View style={{ width: "100%" }}>
+              <View style={{ flexDirection: 'row', justifyContent: "space-between" }}>
+                <Typography.Title>Patient ID : </Typography.Title>
+                <Typography.Title>{patientDetail?.[0]?.patient_code}</Typography.Title>
+              </View>
+              {/* <Typography.Title>Patient ID : {patientDetail?.[0]?.patient_code}</Typography.Title> */}
               <View style={{ height: 3 }} />
-              <Typography.Title size={fonts.font12}>
-                Patient Name : {patientDetail?.[0]?.patient_name}
-              </Typography.Title>
+              <View style={{ flexDirection: 'row', justifyContent: "space-between" }}>
+                <Typography.Title>Patient Name :</Typography.Title>
+                <Typography.Title> {patientDetail?.[0]?.patient_name}</Typography.Title>
+              </View>
             </View>
             {showView ? (
               <View
@@ -62,7 +67,7 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
       headers: {
         "Content-Type": "multipart/form-data"
       }
-    }).then(res => {setPatientDetail(res.data) }).catch(err => err)
+    }).then(res => { setPatientDetail(res.data) }).catch(err => err)
   }
   // get patient detail end
   useEffect(() => {
@@ -71,13 +76,13 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
   }, [focused, id])
 
   const [dayAndSessionFilter, setDayAndSessionFilter] = useState([{}])
-  
+
   useEffect(() => {
     let dates = []
     let dateSession = []
     patientDetail?.[0]?.patienthealthdata.forEach(ele => {
       let day = new Date(ele.created_at).getDate()
-      let month = new Date(ele.created_at).getMonth()+ 1;
+      let month = new Date(ele.created_at).getMonth() + 1;
       let year = new Date(ele.created_at).getFullYear()
       const date = day + "-" + month + "-" + year
       dates = [...dates, date]
@@ -86,7 +91,7 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
 
     patientDetail?.[0]?.patienthealthdata.forEach((ele, indexx) => {
       let day = new Date(ele.created_at).getDate()
-      let month = new Date(ele.created_at).getMonth()+ 1;
+      let month = new Date(ele.created_at).getMonth() + 1;
       let year = new Date(ele.created_at).getFullYear()
       const date = day + "-" + month + "-" + year
       dates.forEach((dateStr, index) => {
@@ -108,7 +113,7 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
 
 
   const DailyReportContainer = (props) => (
-  
+
     <View style={styles.PatientDetailsContainer}>
       <TouchableOpacity disabled>
         <View style={{ flexDirection: 'row' }}>
@@ -216,7 +221,7 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
     </View>
   );
 
-  
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <PatientDetailsCard />
