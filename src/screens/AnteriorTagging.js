@@ -7,7 +7,7 @@ import {
   Image,
   Pressable,
 } from "react-native";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 
 import { AddPatientContext, lungs } from "../context/AddPatientContext";
 
@@ -28,8 +28,7 @@ import { useIsFocused } from "@react-navigation/native";
 import LungXinstance from "../api/server";
 import { AuthContext } from "../context/AuthContext";
 import ProgressStep from "../components/Molecules/ProgressStep";
-
-
+import { Audio } from "expo-av";
 
 export default function AnteriorTagging({ route, navigation }) {
   const EditAnteriorRecTag = route?.params?.EditAnteriorRecTag
@@ -38,6 +37,8 @@ export default function AnteriorTagging({ route, navigation }) {
     = useContext(AddPatientContext);
   const { user } = useContext(AuthContext);
 
+
+  const AudioPlayer = useRef(new Audio.Sound());
 
   const [currrentStep, setCurrentStep] = useState(2);
 
@@ -95,9 +96,9 @@ export default function AnteriorTagging({ route, navigation }) {
         <>
           <Pressable onPress={() => { setallTagVisible(false); setActiveLungsection(recordingLine?.id) }} style={[recordingLine.style, styles.button_wrapper]} key=
             {(() => Math.random())()}>
-            {activeLungsection == index && 
-            <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }}/>
-            // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
+            {activeLungsection == index &&
+              <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }} />
+              // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
             }
             {AnteriorTagging.map((ele) =>
             (
@@ -129,27 +130,52 @@ export default function AnteriorTagging({ route, navigation }) {
         console.log("current sound is not null")
         await stopSound();
       }
-      const sound = recordings.find((recording) => recording.id === id).sound;
-      if (sound) {
-        await sound.playAsync();
-        setCurrentSoundId(id);
-      } else {
-        console.log('No sound found.')
+      // const sound = recordings.find((recording) => recording.id === id).sound;
+      // if (sound) {
+      //   await sound.playAsync();
+      //   setCurrentSoundId(id);
+      // } else {
+      //   console.log('No sound found.')
+      // }
+      const file = recordings.find((recording) => recording.id === id).file;
+      await AudioPlayer.current.loadAsync({ uri: file }, {}, true);
+
+      const playerStatus = await AudioPlayer.current.getStatusAsync();
+
+      if (playerStatus.isLoaded) {
+        if (playerStatus.isPlaying === false) {
+         AudioPlayer.current.playAsync();
+         setCurrentSoundId(id);
+        }
       }
+      AudioPlayer.current.setOnPlaybackStatusUpdate(handlePlaybackStatusUpdate);
     } catch (error) {
       console.error("Failed to play sound", error);
     }
   }
 
+  async function handlePlaybackStatusUpdate(status) {
+    if (status.isLoaded && !status.isPlaying && status.didJustFinish) {
+      await AudioPlayer.current.unloadAsync();
+      setCurrentSoundId(null);
+    }
+  }
+
   async function stopSound() {
     try {
-      const recordingLine = recordings.find(
-        (recording) => recording.id === currentSoundId
-      );
-      if (recordingLine && recordingLine.sound) {
-        await recordingLine.sound.stopAsync();
+      const playerStatus = await AudioPlayer.current.getStatusAsync();
+
+      if (playerStatus.isLoaded === true) {
+        await AudioPlayer.current.unloadAsync()
         setCurrentSoundId(null);
       }
+      // const recordingLine = recordings.find(
+      //   (recording) => recording.id === currentSoundId
+      // );
+      // if (recordingLine && recordingLine.sound) {
+      //   await recordingLine.sound.stopAsync();
+      //   setCurrentSoundId(null);
+      // }
     } catch (error) {
       console.error("Failed to stop sound", error);
     }
@@ -157,7 +183,6 @@ export default function AnteriorTagging({ route, navigation }) {
 
   async function toggleSound(id) {
     try {
-      // set Portion On Focus for the display of true  re-recording section
 
       if (currentSoundId !== null && currentSoundId === id) {
         await stopSound();
@@ -229,7 +254,7 @@ export default function AnteriorTagging({ route, navigation }) {
                           paddingHorizontal: 10,
                           paddingVertical: 5,
                           // width: 130,
-                          marginLeft:3,
+                          marginLeft: 3,
                         }}
                       >
                         <View
@@ -285,7 +310,7 @@ export default function AnteriorTagging({ route, navigation }) {
                       paddingHorizontal: 10,
                       paddingVertical: 5,
                       // width: 130, 
-                      marginLeft:3,
+                      marginLeft: 3,
                     }}
                   >
                     <View style={{ alignItems: "center", flexDirection: "row", }}>
@@ -340,6 +365,11 @@ export default function AnteriorTagging({ route, navigation }) {
           <Text style={commonStyle.btn3}>Click to Select Positions</Text>
         </View> */}
 
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 20 }}>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
+        </View>
+
         <View style={lungs.wrapper}>
 
           <View style={lungs.btn_wrapper}>
@@ -380,7 +410,7 @@ export default function AnteriorTagging({ route, navigation }) {
         <View style={listenRecordingsStyle.main}>
           <Text style={listenRecordingsStyle.title}>Recorded Sounds</Text>
           {listenRecordings()}
-          <Pressable onPress={() => setShowSoundsPopup(false)}>
+          <Pressable onPress={async() => { await stopSound();setShowSoundsPopup(false)}}>
 
             <Text style={listenRecordingsStyle.btn}>Close</Text>
           </Pressable>
@@ -389,7 +419,7 @@ export default function AnteriorTagging({ route, navigation }) {
       <Modal visible={showWarningPopup} contentContainerStyle={containerStyle} onDismiss={() => setShowWarningPopup(false)}>
         <View style={warningStyle.main}>
           <Text style={warningStyle.title}>Confirm</Text>
-          <Text style={warningStyle.title2}>Continue to {EditAnteriorRecTag? "save" : "Tag Posterior"} ?</Text>
+          <Text style={warningStyle.title2}>Continue to {EditAnteriorRecTag ? "save" : "Tag Posterior"} ?</Text>
           <Text style={warningStyle.warn}>Rest all positions will auto tag to Normal</Text>
           <View style={warningStyle.btnWrapper}>
 

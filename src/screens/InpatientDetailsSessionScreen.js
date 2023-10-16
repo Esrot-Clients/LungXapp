@@ -15,6 +15,7 @@ import { AuthContext } from '../context/AuthContext';
 import { lungs, lungsPosterior } from '../context/AddPatientContext';
 import { Audio } from 'expo-av';
 import LoadingScreen from '../components/Atoms/LoadingScreen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 export default function OutPatientsDetailsScreen({ navigation, route }) {
   const [patientstatus, setpatientstatus] = useState('In Patient');
@@ -234,12 +235,12 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
         <>
           <Pressable style={[recordingLine.style, styles.button_wrapper]} key={(() => Math.random())()} onPress={() => playSound(patientLungsDetail?.[0]?.[recordingLine?.lungs_audio], recordingLine?.id)}>
             {patientLungsDetail?.[0]?.[recordingLine?.lungs_audio] && <Text style={styles.play_stop} >{currentSoundId == index ? <Text style={styles.btn_text}>&#9208;</Text> : <Text style={styles.btn_text}>&#9654;</Text>}</Text>}
-           
-                {opt == "" && patientLungsDetail?.[0]?.[recordingLine.lungs_tags] &&
-                  JSON.parse(patientLungsDetail?.[0]?.[recordingLine?.lungs_tags])?.options?.map(res =>
-                    <Text key={(() => Math.random())()} style={{...lungs.tags,  color:res?.id == 5? colors.black:"#990099"}}>{res?.position}</Text>
-                  )
-                }
+
+            {opt == "" && patientLungsDetail?.[0]?.[recordingLine.lungs_tags] &&
+              JSON.parse(patientLungsDetail?.[0]?.[recordingLine?.lungs_tags])?.options?.map(res =>
+                <Text key={(() => Math.random())()} style={{ ...lungs.tags, color: res?.id == 5 ? colors.black : "#990099" }}>{res?.position}</Text>
+              )
+            }
           </Pressable>
         </>
       );
@@ -252,16 +253,16 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
       if (patientLungsDetail?.[0]?.[recordingLine?.lungs_tags] == "{Normal}") {
         opt = "normal"
       }
-      
+
       return (
         <>
           <Pressable style={[recordingLine.style, styles.button_wrapper]} key={(() => Math.random())()} onPress={() => playSound(patientLungsDetail?.[0]?.[recordingLine?.lungs_audio], recordingLine?.id)} >
             {patientLungsDetail?.[0]?.[recordingLine?.lungs_audio] && <Text style={styles.play_stop} >{currentSoundId == recordingLine?.id ? <Text style={styles.btn_text}>&#9208;</Text> : <Text style={styles.btn_text}>&#9654;</Text>}</Text>}
-            
-            {opt == "" && 
+
+            {opt == "" &&
               patientLungsDetail?.[0]?.[recordingLine.lungs_tags]
               && JSON.parse(patientLungsDetail?.[0]?.[recordingLine?.lungs_tags])?.options?.map(res =>
-                <Text key={(() => Math.random())()} style={{...lungs.tags,  color:res?.id == 5? colors.black:"#990099"}}>{res?.position}</Text>
+                <Text key={(() => Math.random())()} style={{ ...lungs.tags, color: res?.id == 5 ? colors.black : "#990099" }}>{res?.position}</Text>
               )
             }
           </Pressable>
@@ -343,9 +344,15 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
 
 
       <View style={styles.symptomsDetails}>
-        <Title color={colors.green} size={fonts.font12}>
-          Anterior Recordings and Tags
-        </Title>
+        <View style={{ flexDirection: "row", display: "flex", width: "100%" }}>
+          <Title color={colors.green} size={fonts.font12}>
+            Anterior Recordings and Tags
+          </Title>
+        </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 20 }}>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
+        </View>
         <View style={lungs.wrapper}>
           <View style={lungs.btn_wrapper}>
             {getAnteriorRecordingLines()}
@@ -358,9 +365,15 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
 
 
       <View style={styles.symptomsDetails}>
-        <Title color={colors.green} size={fonts.font12}>
-          Posterior Recordings and Tags
-        </Title>
+        <View style={{ flexDirection: "row", display: "flex", width: "100%" }}>
+          <Title color={colors.green} size={fonts.font12} >
+            Posterior Recordings and Tags
+          </Title>
+        </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 20 }}>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+        </View>
         <View style={lungsPosterior.wrapper}>
           <View style={lungsPosterior.btn_wrapper}>
             {getPosteriorRecordingLines()}
@@ -428,6 +441,7 @@ const styles = StyleSheet.create({
   },
   symptomsDetails: {
     display: "flex",
+    justifyContent: "center", alignItems: "center",
     width: metrics.screenWidth * 0.9,
     marginVertical: 8,
     borderRadius: 8,

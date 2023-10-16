@@ -14,6 +14,7 @@ import { AuthContext } from "../context/AuthContext";
 import LungXinstance from "../api/server";
 import { FontAwesome } from '@expo/vector-icons';
 import ProgressStep from "../components/Molecules/ProgressStep";
+import fonts from "../constants/fontsSize";
 
 
 export default function PosteriorRecording({ navigation, route }) {
@@ -38,13 +39,8 @@ export default function PosteriorRecording({ navigation, route }) {
   const { newlyCreatedPatientId, newlyCreatedPatientLungsId, handleAnteriorPositionTagging } = useContext(AddPatientContext)
   const { user } = useContext(AuthContext);
 
+  const AudioPlayer = useRef(new Audio.Sound());
 
-
-  async function convert_Url_Blob_File(url) {
-    let blob = await fetch(url).then(res => res.blob())
-    const file = new File([blob], url.split(":")[3], { type: blob.type })
-    return file
-  }
 
   async function handlePatientPosteriorRecordings() {
 
@@ -56,46 +52,64 @@ export default function PosteriorRecording({ navigation, route }) {
         25,
         50
       )
+    } else if (isPlaying) {
+      ToastAndroid.showWithGravityAndOffset(
+        'The audio is currently playing. Please wait for it to finish.',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+        25,
+        50
+      )
     } else {
-      const payload = new FormData()
-      recordingsPosterior.forEach(async (ele, index) => {
-        if (ele.file != "") {
-          const audioFile = {
-            uri: ele?.file,
-            name: ele?.file,
-            type: "video/3gp"
-          }
-          payload.append(ele?.key, audioFile)
-        }
-        if (index == 5) {
-          payload.append("patient", newlyCreatedPatientId)
-          payload.append("doctor", user?.id)
-          payload.append("id", newlyCreatedPatientLungsId)
+     
+      if (EditPosteriorRecTag == "Edit Posterior Rec Tag") {
+        navigation.push("Posterior Tagging", {
+          EditPosteriorRecTag: EditPosteriorRecTag
+        })
+      } else {
+        navigation.navigate("Anterior Tagging");
+      }
+    }
 
+  }
 
-          try {
-            setTimeout(async () => {
-              const res = await LungXinstance.patch("/api/lung_audio/", payload, {
-                headers: {
-                  'content-type': 'multipart/form-data'
-                }
-              })
+  async function handlePatientPosteriorRecordingsNew(key, file) {
+    const payload = new FormData()
+    const audioFile = {
+      uri: file,
+      name: file,
+      type: "video/3gp"
+    }
+    payload.append(key, audioFile)
 
-              if (EditPosteriorRecTag == "Edit Posterior Rec Tag") {
-                navigation.push("Posterior Tagging", {
-                  EditPosteriorRecTag: EditPosteriorRecTag
-                })
-              } else {
-                navigation.navigate("Anterior Tagging");
-              }
-            }, 2000)
+    try {
+      payload.append("patient", newlyCreatedPatientId)
+      payload.append("doctor", user?.id)
+      payload.append("id", newlyCreatedPatientLungsId)
 
-          } catch (error) {
-            console.log("eoorr------------------------------")
-            console.log(error)
-          }
+      const res = await LungXinstance.patch("/api/lung_audio/", payload, {
+        headers: {
+          'content-type': 'multipart/form-data'
         }
       })
+
+      recordingsPosterior.forEach(async (recordingss, index) => {
+        if (recordingss.key == key) {
+          const uri = `https://lung.thedelvierypointe.com${res?.data?.[recordingss.key]}`
+          // const { sound } = await Audio.Sound.createAsync({ uri: uri });
+          recordingss.sound = "sound";
+          recordingss.file = uri;
+        }
+      });
+
+      setTimeout(() => {
+        setRecordText("");
+      }, 1000)
+
+
+    } catch (error) {
+      console.log("eoorr------------------------------")
+      console.log(error)
     }
 
   }
@@ -108,40 +122,52 @@ export default function PosteriorRecording({ navigation, route }) {
         await stopSound();
       }
 
-      const sound = recordingsPosterior.find((recording) => recording.id === id).sound;
+      const file = recordingsPosterior.find((recording) => recording.id === id).file;
+      await AudioPlayer.current.loadAsync({ uri: file }, {}, true);
 
-      if (sound) {
-        btnState[id] = "recording"
-        await sound.playAsync();
-        setCurrentSoundId(id);
-      } else {
-        console.log('No sound found.')
-      }
+      const playerStatus = await AudioPlayer.current.getStatusAsync();
 
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
-          sound.stopAsync();
-          setCurrentSoundId(null);
-          setIsPlaying(false)
+      if (playerStatus.isLoaded) {
+        if (playerStatus.isPlaying === false) {
+          btnState[id] = "recording"
+          AudioPlayer.current.playAsync();
+          setCurrentSoundId(id);
         }
-      });
+      }
+      AudioPlayer.current.setOnPlaybackStatusUpdate(handlePlaybackStatusUpdate);
+
     } catch (error) {
       console.error("Failed to play sound", error);
     }
   }
 
+
+  async function handlePlaybackStatusUpdate(status) {
+    if (status.isLoaded && !status.isPlaying && status.didJustFinish) {
+      await AudioPlayer.current.unloadAsync();
+      setCurrentSoundId(null);
+      setIsPlaying(false)
+    }
+  }
+
   async function stopSound() {
     try {
-      const recordingLine = recordingsPosterior.find(
-        (recording) => recording.id === currentSoundId
-      );
+    
+      const playerStatus = await AudioPlayer.current.getStatusAsync();
 
-      if (recordingLine && recordingLine.sound) {
-        await recordingLine.sound.stopAsync();
+      if (playerStatus.isLoaded === true) {
+        await AudioPlayer.current.unloadAsync()
         setCurrentSoundId(null);
       }
     } catch (error) {
       console.error("Failed to stop sound", error);
+      ToastAndroid.showWithGravityAndOffset(
+        'Failed to play sound!',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+        25,
+        50
+      )
     }
   }
 
@@ -241,33 +267,19 @@ export default function PosteriorRecording({ navigation, route }) {
     recordingRef.current = null;
 
     if (recording) {
-      clearTimeout(recordingTimeout); // Clear the recording timeout
+      clearTimeout(recordingTimeout);
 
       try {
         await recording.stopAndUnloadAsync();
 
         const { sound, status } = await recording.createNewLoadedSoundAsync();
+        var file = recording.getURI()
+        var recKey = recordingsPosterior[id - 7].key;
+
         if (typeof id != "number") {
-          const updatedRecordings = [...recordingsPosterior];
-          updatedRecordings.push({
-            id: recordingsPosterior.length + 1,
-            sound: sound,
-            duration: getDurationFormatted(status.durationMillis),
-            file: recording.getURI(),
-          });
-
-          setRecordingsPosterior(updatedRecordings);
-          setMessage("");
+          await handlePatientPosteriorRecordingsNew(recKey, file)
         } else {
-          recordingsPosterior.forEach((recordingss, index) => {
-            if (recordingss.id == id) {
-              recordingss.sound = sound;
-              recordingss.duration = getDurationFormatted(status.durationMillis);
-              recordingss.file = recording.getURI();
-            }
-          });
-
-          setRecordText("");
+          await handlePatientPosteriorRecordingsNew(recKey, file)
         }
       } catch (err) {
         console.error("Failed to stop recording", err);
@@ -384,6 +396,10 @@ export default function PosteriorRecording({ navigation, route }) {
         </Pressable>
       </View>
 
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15 }}>
+        <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
+        <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+      </View>
 
       <View style={lungsPosterior.wrapper}>
 
@@ -426,8 +442,16 @@ export default function PosteriorRecording({ navigation, route }) {
                     25,
                     50
                   )
-                  :
-                  navigation.goBack();
+                  : isPlaying ?
+                    ToastAndroid.showWithGravityAndOffset(
+                      'The audio is currently playing. Please wait for it to finish.',
+                      ToastAndroid.SHORT,
+                      ToastAndroid.BOTTOM,
+                      25,
+                      50
+                    )
+                    :
+                    navigation.goBack();
               }}
             />
           }
