@@ -348,7 +348,7 @@ export default function AnteriorTagging({ route, navigation }) {
             justifyContent: "space-between", marginTop: 10
           }}
         >
-          <TouchableOpacity onPress={() => { setActiveLungsection(null); setallTagVisible(!alltagVisible) }}>
+          <TouchableOpacity onPress={() => { setActiveLungsection(null); setallTagVisible(true) }}>
             <Text style={commonStyle.btn3}>Tag total lungs</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleTagDiscarding()}>

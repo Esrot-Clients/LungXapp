@@ -71,7 +71,7 @@ export default function HomePrimaryScreen({navigation}) {
         style={styles.IconContainer}
         activeOpacity={0.8}
         onPress={async() =>{
-          // await resetStateObj()
+          await resetStateObj()
           navigation.navigate("Add Patient", {
             screen: "Add Patient",
             params: {
