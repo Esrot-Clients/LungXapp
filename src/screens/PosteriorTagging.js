@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Pressable, Image } from "react-native";
-import React, { useState, useContext, useEffect , useRef} from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 
 import * as Button from "../components/Atoms/Button";
 import metrics from "../constants/layout";
@@ -30,7 +30,7 @@ export default function PosteriorTagging({ navigation, route }) {
 
   const [currrentStep, setCurrentStep] = useState(3);
 
-  const [alltagVisible, setallTagVisible] = useState(false)
+  const [alltagVisible, setallTagVisible] = useState(true)
   const [activeLungsection, setActiveLungsection] = useState(null)
   const [showSoundsPopup, setShowSoundsPopup] = useState(false)
   const [showWarningPopup, setShowWarningPopup] = useState(false)
@@ -56,7 +56,8 @@ export default function PosteriorTagging({ navigation, route }) {
             (
               ele.id == index + 1 &&
               ele.options.map(option => (
-                option.isChecked && option.id != 6 && option.id != 5 &&
+                option.isChecked && option.id != 6 &&
+                //  option.id != 5 &&
                 <>
                   <Text key={(() => Math.random())()} style={lungsPosterior.tags}>{option.position}</Text>
                 </>
@@ -80,7 +81,7 @@ export default function PosteriorTagging({ navigation, route }) {
         console.log("current sound is not null")
         await stopSound();
       }
-     
+
       const file = recordingsPosterior.find((recording) => recording.id === id).file;
       await AudioPlayer.current.loadAsync({ uri: file }, {}, true);
 
@@ -88,8 +89,8 @@ export default function PosteriorTagging({ navigation, route }) {
 
       if (playerStatus.isLoaded) {
         if (playerStatus.isPlaying === false) {
-         AudioPlayer.current.playAsync();
-         setCurrentSoundId(id);
+          AudioPlayer.current.playAsync();
+          setCurrentSoundId(id);
         }
       }
       AudioPlayer.current.setOnPlaybackStatusUpdate(handlePlaybackStatusUpdate);
@@ -114,7 +115,7 @@ export default function PosteriorTagging({ navigation, route }) {
         setCurrentSoundId(null);
       }
 
-      
+
     } catch (error) {
       console.error("Failed to stop sound", error);
     }
@@ -146,13 +147,43 @@ export default function PosteriorTagging({ navigation, route }) {
     });
   }
 
-  const handleTaggingAllAnteriorPosition = (symptomsName, state) => {
+  const handleTaggingAllAnteriorPosition = (symptomsName, state, checkStatus) => {
     const newtag = tagsposterior.map((symptoms) => {
-      if (symptomsName === "All" && state) {
+      if (symptomsName === "All" && state && !checkStatus) {
+        if (symptoms.id == 5) {
+          return { ...symptoms, isChecked: false }
+        } else {
+          return { ...symptoms, isChecked: true }
+        }
+      }
+      else if (symptomsName === "All" && state && checkStatus) {
+        if (symptoms.id != 5) {
+          return { ...symptoms, isChecked: false }
+        }
+      }
+      else if (symptomsName === "Normal" && state && !checkStatus) {
+        if (symptoms.id == 5) {
+          return { ...symptoms, isChecked: true }
+        } else {
+          return { ...symptoms, isChecked: false }
+        }
+      }
+      else if (symptomsName === "Normal" && state && checkStatus) {
+        if (symptoms.id == 5) {
+          return { ...symptoms, isChecked: false }
+        }
+      }
+      else if (symptoms.position == symptomsName && checkStatus) {
+        return { ...symptoms, isChecked: false }
+      }
+      else if (symptoms.position == symptomsName && !checkStatus) {
         return { ...symptoms, isChecked: true }
       }
-      else if (symptoms.position == symptomsName) {
-        return { ...symptoms, isChecked: !symptoms.isChecked }
+      else if (symptoms.id == 5 && symptoms.isChecked == true) {
+        return { ...symptoms, isChecked: false }
+      }
+      else if (symptoms.id == 6 && symptoms.isChecked == true) {
+        return { ...symptoms, isChecked: false }
       }
       else if (symptoms.position == symptomsName && !state) {
         return { ...symptoms, isChecked: false }
@@ -163,11 +194,41 @@ export default function PosteriorTagging({ navigation, route }) {
 
     const newAnteriorTagging = PosteriorTagging.map((position) => {
       const newAnteriorOption = position.options.map((symptoms) => {
-        if (symptomsName === "All" && state) {
+        if (symptomsName === "All" && state && !checkStatus) {
+          if (symptoms.id == 5) {
+            return { ...symptoms, isChecked: false }
+          } else {
+            return { ...symptoms, isChecked: true }
+          }
+        }
+        else if (symptomsName === "All" && state && checkStatus) {
+          if (symptoms.id != 5) {
+            return { ...symptoms, isChecked: false }
+          }
+        }
+        else if (symptomsName === "Normal" && state && !checkStatus) {
+          if (symptoms.id == 5) {
+            return { ...symptoms, isChecked: true }
+          } else {
+            return { ...symptoms, isChecked: false }
+          }
+        }
+        else if (symptomsName === "Normal" && state && checkStatus) {
+          if (symptoms.id == 5) {
+            return { ...symptoms, isChecked: false }
+          }
+        }
+        else if (symptoms.position === symptomsName && state && checkStatus) {
+          return { ...symptoms, isChecked: false }
+        }
+        else if (symptoms.position === symptomsName && state && !checkStatus) {
           return { ...symptoms, isChecked: true }
         }
-        else if (symptoms.position === symptomsName && state) {
-          return { ...symptoms, isChecked: !symptoms.isChecked }
+        else if (symptoms.id == 5 && symptoms.isChecked == true) {
+          return { ...symptoms, isChecked: false }
+        }
+        else if (symptoms.id == 6 && symptoms.isChecked == true) {
+          return { ...symptoms, isChecked: false }
         }
         else if (symptoms.position === symptomsName && !state) {
           return { ...symptoms, isChecked: false }
@@ -199,14 +260,40 @@ export default function PosteriorTagging({ navigation, route }) {
 
   //Anterior Tagging controller runs on  input changes (checkboxes)
 
-  const handleAnteriorPositionTagging = (positionid, optionid, state) => {
+  const handleAnteriorPositionTagging = (positionid, optionid, state, checkStatus) => {
 
     const newAnteriorTagging = PosteriorTagging.map((position) => {
+     
+      if (optionid == 5 && position.id === positionid) {
+        const newOptions = position.options.map((option) => {
+          if (!state) {
+            return { ...option, isChecked: false };
+          }
+          if (state && !checkStatus) {
+            if (option.id == 5) {
+              return { ...option, isChecked: true };
+            } else {
+            return { ...option, isChecked: false };
+            }
+          }
+          else if(state && checkStatus){
+            return { ...option, isChecked: false };
+          }
+          return option;
+        });
+        return { ...position, options: newOptions };
+      }
       if (position.id === positionid && optionid != 6) {
         const newOptions = position.options.map((option) => {
-          if (option.id === optionid) {
+          if (option.id === 5 && option.isChecked ) {
+            return { ...option, isChecked: false };
+          }else if (option.id === 6 && option.isChecked ) {
+            return { ...option, isChecked: false };
+          }
+          else if (option.id === optionid) {
             return { ...option, isChecked: !option.isChecked };
           }
+          
           return option;
         });
         return { ...position, options: newOptions };
@@ -216,8 +303,15 @@ export default function PosteriorTagging({ navigation, route }) {
           if (!state) {
             return { ...option, isChecked: false };
           }
-          if (state) {
+          if (state && !checkStatus) {
+            if (option.id == 5) {
+              return { ...option, isChecked: false };
+            } else {
             return { ...option, isChecked: true };
+            }
+          }
+          else if(state && checkStatus){
+            return { ...option, isChecked: false };
           }
           return option;
         });
@@ -275,7 +369,7 @@ export default function PosteriorTagging({ navigation, route }) {
                       <View key={(() => Math.random())()}
                         style={{
                           alignItems: "flex-start",
-                          paddingHorizontal: 10,
+                          paddingHorizontal: 5,
                           paddingVertical: 5,
                           // width: 130,
                           marginLeft: 3,
@@ -288,7 +382,7 @@ export default function PosteriorTagging({ navigation, route }) {
                             style={{ backgroundColor: '#fff' }}
                             status={symptom.isChecked ? 'checked' : 'unchecked'}
                             tintColors={{ true: colors.green, false: "grey" }}
-                            onPress={(state) => { handleAnteriorPositionTagging(position.id, symptom.id, state) }}
+                            onPress={(state) => { handleAnteriorPositionTagging(position.id, symptom.id, state, symptom.isChecked) }}
                           />
                           <View style={{ width: 5 }} />
                           <SubTitle size={fonts.font10}>
@@ -325,7 +419,7 @@ export default function PosteriorTagging({ navigation, route }) {
                     <View key={(() => Math.random())()}
                       style={{
                         alignItems: "flex-start",
-                        paddingHorizontal: 10,
+                        paddingHorizontal: 5,
                         paddingVertical: 5,
                         // width: 130,
                         marginLeft: 3,
@@ -338,9 +432,9 @@ export default function PosteriorTagging({ navigation, route }) {
                           style={{ backgroundColor: '#fff' }}
                           status={symptom.isChecked ? 'checked' : 'unchecked'}
                           tintColors={{ true: colors.green, false: "grey" }}
-                          onPress={(state) => { handleTaggingAllAnteriorPosition(symptom.position, state) }}
+                          onPress={(state) => { handleTaggingAllAnteriorPosition(symptom.position, state, symptom.isChecked) }}
                         />
-                        <View style={{ width: 5 }} />
+                        <View style={{ width: 2 }} />
                         <SubTitle size={fonts.font10}>
                           {symptom.position}
                         </SubTitle>
@@ -424,7 +518,7 @@ export default function PosteriorTagging({ navigation, route }) {
         <View style={listenRecordingsStyle.main}>
           <Text style={listenRecordingsStyle.title}>Recorded Sounds</Text>
           {listenRecordings()}
-          <Pressable onPress={async() => { await stopSound();setShowSoundsPopup(false)}}>
+          <Pressable onPress={async () => { await stopSound(); setShowSoundsPopup(false) }}>
             <Text style={listenRecordingsStyle.btn}>Close</Text>
           </Pressable>
         </View>

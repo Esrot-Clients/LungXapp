@@ -102,12 +102,14 @@ export default function OutpatientListScreen({ navigation }) {
               <Button.BtnContain
                 label="Add Patient"
                 color={colors.green}
-                onPress={() =>
+                onPress={async() =>{
+                  await resetStateObj()
                   navigation.navigate("Add Patient", {
                     params: {
                       screenType: "Entry Point",
                     },
                   })
+                }
                 }
               />
             </View>

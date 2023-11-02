@@ -1,5 +1,5 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import React, { useState, useEffect, useContext, } from 'react';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, ToastAndroid } from 'react-native';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import colors from '../constants/colors';
 import { SubTitle, Title } from '../components/Atoms/Typography';
 import metrics from '../constants/layout';
@@ -20,13 +20,13 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
   const { id } = route?.params?.item;
   const focused = useIsFocused()
   const { user } = useContext(AuthContext);
-  const sound = new Audio.Sound()
+  const sound = useRef(new Audio.Sound());
 
   const [loading, setloading] = useState(true);
 
   const [patientDetail, setPatientDetail,] = useState(null)
   const [patientLungsDetail, setPatientLungsDetail,] = useState(null)
-  
+
 
   const [recordings, setRecordings] = useState([
     {
@@ -34,7 +34,7 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
       style: lungs.btn0,
       lungs_audio: "p0_audio",
       lungs_tags: "p0_tag",
-  
+
     },
     {
       id: 1,
@@ -47,35 +47,35 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
       style: lungs.btn2,
       lungs_audio: "p2_audio",
       lungs_tags: "p2_tag",
-  
+
     },
     {
       id: 3,
       style: lungs.btn3,
       lungs_audio: "p3_audio",
       lungs_tags: "p3_tag",
-  
+
     },
     {
       id: 4,
       style: lungs.btn4,
       lungs_audio: "p4_audio",
       lungs_tags: "p4_tag",
-  
+
     },
     {
       id: 5,
       style: lungs.btn5,
       lungs_audio: "p5_audio",
       lungs_tags: "p5_tag",
-  
+
     },
     {
       id: 6,
       style: lungs.btn6,
       lungs_audio: "p6_audio",
       lungs_tags: "p6_tag",
-  
+
     },
   ]);
 
@@ -85,7 +85,7 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
       style: lungsPosterior.btn7,
       lungs_audio: "p7_audio",
       lungs_tags: "p7_tag",
-  
+
     },
     {
       id: 8,
@@ -98,33 +98,33 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
       style: lungsPosterior.btn9,
       lungs_audio: "p9_audio",
       lungs_tags: "p9_tag",
-  
+
     },
     {
       id: 10,
       style: lungsPosterior.btn10,
       lungs_audio: "p10_audio",
       lungs_tags: "p10_tag",
-  
+
     },
     {
       id: 11,
       style: lungsPosterior.btn11,
       lungs_audio: "p11_audio",
       lungs_tags: "p11_tag",
-  
+
     },
     {
       id: 12,
       style: lungsPosterior.btn12,
       lungs_audio: "p12_audio",
       lungs_tags: "p12_tag",
-  
+
     }
   ]);
-  
+
   const [currentSoundId, setCurrentSoundId] = useState(null);
-  
+
   const getPatientLungsDetail = async () => {
     return LungXinstance.post(`api/lung_audio/`, { doctor_id: user.id, patient_id: id }, {
       headers: {
@@ -138,17 +138,17 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
       headers: {
         "Content-Type": "multipart/form-data"
       }
-    }).then(res => { setPatientDetail(res.data);setloading(false) }).catch(err => err)
+    }).then(res => { setPatientDetail(res.data); setloading(false) }).catch(err => err)
 
   }
- 
+
 
   useEffect(() => {
     getPatientLungsDetail()
     getPatientDetail()
   }, [focused, id])
 
- 
+
   const PatientGenderCard = ({ gender }) => (
     <View style={{ marginVertical: 10 }}>
       <Title color={colors.black} size={fonts.font12}>
@@ -180,33 +180,60 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
   async function playSound(track, id) {
     try {
       const uri = `https://lung.thedelvierypointe.com${track}`
-      if (+currentSoundId === id) {
+      if (currentSoundId === id) {
         setCurrentSoundId("no track")
-        //  sound.stopAsync()
-        sound.unloadAsync()
-
-      } else {
-        if (sound.isPlaying) {
-          sound.stopAsync()
+        await stopSound()
+      }
+      else {
+        if (currentSoundId != id) {
+          await stopSound()
         }
-        await sound.loadAsync({
-          uri
-        })
-        await sound.playAsync();
-        setCurrentSoundId(id);
+        await sound.current.loadAsync({ uri: uri }, {}, true);
+
+        const playerStatus = await sound.current.getStatusAsync();
+
+        if (playerStatus.isLoaded) {
+          if (playerStatus.isPlaying === false) {
+            sound.current.playAsync();
+            setCurrentSoundId(id);
+          }
+          else {
+            await stopSound()
+          }
+        }
+        sound.current.setOnPlaybackStatusUpdate(handlePlaybackStatusUpdate);
       }
     } catch (error) {
       console.error("Failed to play sound", error);
+      ToastAndroid.showWithGravityAndOffset(
+        'Failed to play sound!',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+        25,
+        50
+      )
     }
   }
 
-  useEffect(() => {
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.didJustFinish) {
-        setCurrentSoundId(null); 
+  async function stopSound() {
+    try {
+      const playerStatus = await sound.current.getStatusAsync();
+
+      if (playerStatus.isLoaded === true) {
+        await sound.current.unloadAsync()
+        setCurrentSoundId(null);
       }
-    });
-  }, [sound]);
+    } catch (error) {
+      console.error("Failed to stop sound", error);
+    }
+  }
+
+  async function handlePlaybackStatusUpdate(status) {
+    if (status.isLoaded && !status.isPlaying && status.didJustFinish) {
+      await sound.current.unloadAsync();
+      setCurrentSoundId(null);
+    }
+  }
 
 
   function getAnteriorRecordingLines() {
@@ -222,7 +249,7 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
             {patientLungsDetail?.[0]?.[recordingLine?.lungs_audio] && <Text style={styles.play_stop} >{currentSoundId == index ? <Text style={styles.btn_text}>&#9208;</Text> : <Text style={styles.btn_text}>&#9654;</Text>}</Text>}
             {opt == "" &&
               patientLungsDetail?.[0]?.[recordingLine.lungs_tags] && JSON.parse(patientLungsDetail?.[0]?.[recordingLine?.lungs_tags])?.options?.map(res =>
-                <Text key={(() => Math.random())()} style={{...lungs.tags,  color:res?.id == 5? colors.black:"#990099"}}>{res?.position}</Text>
+                <Text key={(() => Math.random())()} style={{ ...lungs.tags, color: res?.id == 5 ? colors.black : "#990099" }}>{res?.position}</Text>
               )
             }
           </Pressable>
@@ -244,7 +271,7 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
             {patientLungsDetail?.[0]?.[recordingLine?.lungs_audio] && <Text style={styles.play_stop} >{currentSoundId == recordingLine?.id ? <Text style={styles.btn_text}>&#9208;</Text> : <Text style={styles.btn_text}>&#9654;</Text>}</Text>}
             {opt == "" &&
               patientLungsDetail?.[0]?.[recordingLine.lungs_tags] && JSON.parse(patientLungsDetail?.[0]?.[recordingLine?.lungs_tags])?.options?.map(res =>
-                <Text key={(() => Math.random())()} style={{...lungs.tags,  color:res?.id == 5? colors.black:"#990099"}}>{res?.position}</Text>
+                <Text key={(() => Math.random())()} style={{ ...lungs.tags, color: res?.id == 5 ? colors.black : "#990099" }}>{res?.position}</Text>
               )
             }
           </Pressable>
@@ -309,7 +336,7 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
           width={metrics.screenWidth * 0.43}
           label="Oxygen saturation(SpO2)"
           editable={false}
-          value={patientDetail?.[0]?.patienthealthdata?.[0]?.oxygen_saturation + "%"}
+          value={patientDetail?.[0]?.patienthealthdata?.[0]?.oxygen_saturation ? patientDetail?.[0]?.patienthealthdata?.[0]?.oxygen_saturation + "%":""}
         />
         <Textinput
           width={metrics.screenWidth * 0.43}
@@ -328,10 +355,10 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
 
 
       <View style={styles.symptomsDetails}>
-      <View style={{ flexDirection: "row", display: "flex", width: "100%" }}>
-        <Title color={colors.green} size={fonts.font12}>
-          Anterior Recordings and Tags
-        </Title>
+        <View style={{ flexDirection: "row", display: "flex", width: "100%" }}>
+          <Title color={colors.green} size={fonts.font12}>
+            Anterior Recordings and Tags
+          </Title>
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 20 }}>
           <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
@@ -350,10 +377,10 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
       {/* lungsPosterior image and activeLungsection selector buttons */}
 
       <View style={styles.symptomsDetails}>
-      <View style={{ flexDirection: "row", display: "flex", width: "100%" }}>
-        <Title color={colors.green} size={fonts.font12}>
-          Posterior Recordings and Tags
-        </Title>
+        <View style={{ flexDirection: "row", display: "flex", width: "100%" }}>
+          <Title color={colors.green} size={fonts.font12}>
+            Posterior Recordings and Tags
+          </Title>
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 20 }}>
           <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>

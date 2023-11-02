@@ -38,6 +38,7 @@ export default function AddPatientScreen({ route, navigation }) {
   const existedPatientId = route?.params?.existedPatientId;
   const existedPatientHealthId = route?.params?.existedPatientHealthId;
   const session = route?.params?.session;
+  const existedSessionCreatedData = route?.params?.existedSessionCreatedData;
 
   const {
     patientstatus,
@@ -228,56 +229,7 @@ export default function AddPatientScreen({ route, navigation }) {
         25,
         50
       );
-    } else if (patientAge == "") {
-      ToastAndroid.showWithGravityAndOffset(
-        'Age is required!',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM,
-        25,
-        50
-      );
-    } else if (filterGenderArray == "") {
-      ToastAndroid.showWithGravityAndOffset(
-        'Gender is required!',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM,
-        25,
-        50
-      );
-    } else if (patientWeight == "") {
-      ToastAndroid.showWithGravityAndOffset(
-        'Weight is required!',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM,
-        25,
-        50
-      );
-    } else if (patientTemperture == "") {
-      ToastAndroid.showWithGravityAndOffset(
-        'Temperture is required!',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM,
-        25,
-        50
-      );
-    }
-    else if (patientOxygenLevel == "") {
-      ToastAndroid.showWithGravityAndOffset(
-        'Oxygen Saturation is required!',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM,
-        25,
-        50
-      );
-    } else if (patientBloodPressure == "") {
-      ToastAndroid.showWithGravityAndOffset(
-        'Blood Pressure is required!',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM,
-        25,
-        50
-      );
-    } else {
+    }  else {
       const payload = {
         doctor_id: user?.id,
         patient_name: patientname,
@@ -494,12 +446,11 @@ export default function AddPatientScreen({ route, navigation }) {
           "Content-Type": "multipart/form-data"
         }
       })
-     
-      if (res?.data?.length > 0) {
 
+      if (res?.data?.length > 0) {
         var Data = {};
         if (session) {
-          var newDatafilter = res?.data?.filter(item => item.session === session);
+          var newDatafilter = res?.data?.filter(item => item.session === session && item.created_at.slice(0, 10) == existedSessionCreatedData.slice(0, 10));
           Data = newDatafilter?.[0]
           var parts = session.split(" ");
           setSessionNo(parseInt(parts[1]))
@@ -595,7 +546,7 @@ export default function AddPatientScreen({ route, navigation }) {
 
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       {
         loading ? <LoadingScreen /> : null
       }
@@ -626,9 +577,10 @@ export default function AddPatientScreen({ route, navigation }) {
         value={patientid + ""}
         editable={false}
       />
-
+      
       <View
         style={{
+          display:"flex",
           flexDirection: "row",
           justifyContent: "space-between",
           width: metrics.screenWidth * 0.9,
@@ -684,7 +636,6 @@ export default function AddPatientScreen({ route, navigation }) {
           label="Blood Pressure(mm/hg)"
           onChangeText={setpatientBloodPressure}
           value={patientBloodPressure}
-          keyboardType="numeric" 
         />
       </View>
 

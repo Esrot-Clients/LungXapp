@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, TextInput} from 'react-native';
+import { StyleSheet, Text, View, TextInput } from 'react-native';
 import React from 'react';
 import metrics from '../../constants/layout';
 import fonts from '../../constants/fontsSize';
@@ -27,7 +27,7 @@ export const Textinput = ({
   multiline,
   editable,
   onChangeText,
-  onSubmitEditing,keyboardType
+  onSubmitEditing, keyboardType
 }) => {
 
 
@@ -38,19 +38,19 @@ export const Textinput = ({
   const handleSubmit = () => {
     onSubmitEditing && onSubmitEditing();
   };
-  
+
   return (
-    <View style={{marginVertical: 10,}}>
-      {label ? <Title  color={colors.black} size={fonts.font12}>{label}</Title> : null}
+    <View style={{ marginVertical: 10, }}>
+      {label ? <Title color={colors.black} size={fonts.font12}>{label}</Title> : null}
       <TextInput
-      editable={editable}
+        editable={editable}
         style={[
           styles.textinput,
           {
             height: height ? height : 55,
             width: width ? width : metrics.screenWidth * 0.9,
-            textAlignVertical : height ? 'top' : 'center',
-            textAlign: width ? 'center' : 'left'
+            textAlignVertical: height ? 'top' : 'center',
+            // textAlign: width ? 'center' : 'left'
           },
         ]}
         value={value}
