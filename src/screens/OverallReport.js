@@ -1,5 +1,5 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, View, TouchableOpacity } from "react-native";
-import React, { useState, useContext, useEffect } from "react";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, TouchableOpacity, ToastAndroid } from "react-native";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import colors from "../constants/colors";
 import * as Typography from "../components/Atoms/Typography";
 import metrics from "../constants/layout";
@@ -56,7 +56,7 @@ export default function OverallReport({ navigation, route }) {
   const [showWarningPopup, setShowWarningPopup] = useState(false)
   const isFocused = useIsFocused()
 
-  const sound = new Audio.Sound()
+  const sound = useRef(new Audio.Sound());
   const [currentSoundId, setCurrentSoundId] = useState(null);
 
   const { resetStateObj } = useContext(AddPatientContext);
@@ -102,33 +102,60 @@ export default function OverallReport({ navigation, route }) {
 
   async function playSound(uri, id) {
     try {
-
       if (currentSoundId === id) {
-        await sound.stopAsync();
         setCurrentSoundId(null)
-      } else {
-        if (sound.isPlaying) {
-          await sound.stopAsync()
+        await stopSound()
+      }
+      else {
+        if (currentSoundId != id) {
+          await stopSound()
         }
-        await sound.loadAsync({
-          uri
-        })
-        await sound.playAsync();
-        setCurrentSoundId(id);
+        await sound.current.loadAsync({ uri: uri }, {}, true);
+
+        const playerStatus = await sound.current.getStatusAsync();
+
+        if (playerStatus.isLoaded) {
+          if (playerStatus.isPlaying === false) {
+            sound.current.playAsync();
+            setCurrentSoundId(id);
+          }
+          else {
+            await stopSound()
+          }
+        }
+        sound.current.setOnPlaybackStatusUpdate(handlePlaybackStatusUpdate);
       }
     } catch (error) {
       console.error("Failed to play sound", error);
+      ToastAndroid.showWithGravityAndOffset(
+        'Failed to play sound!',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+        25,
+        50
+      )
     }
   }
 
-  useEffect(() => {
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.didJustFinish) {
+  async function stopSound() {
+    try {
+      const playerStatus = await sound.current.getStatusAsync();
+
+      if (playerStatus.isLoaded === true) {
+        await sound.current.unloadAsync()
         setCurrentSoundId(null);
       }
-    });
-  }, [sound]);
+    } catch (error) {
+      console.error("Failed to stop sound", error);
+    }
+  }
 
+  async function handlePlaybackStatusUpdate(status) {
+    if (status.isLoaded && !status.isPlaying && status.didJustFinish) {
+      await sound.current.unloadAsync();
+      setCurrentSoundId(null);
+    }
+  }
 
 
   function getRecordingLines() {
@@ -215,12 +242,11 @@ export default function OverallReport({ navigation, route }) {
         // setTimeout(() => {
         //   setloading(false)
         //   setShowWarningPopup(true)
-        // }, 10000);
-        // handleClearAddPatientData()
-        resetStateObj();
+        // }, 2000);
+        handleClearAddPatientData()
         setloading(false)
         setShowWarningPopup(true)
-
+        // resetStateObj();
       } else {
         setloading(false)
       }

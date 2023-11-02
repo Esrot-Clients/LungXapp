@@ -1,4 +1,4 @@
-import { StyleSheet, ScrollView, Text, View, Button, Image, Pressable, ToastAndroid } from "react-native";
+import { StyleSheet, ScrollView, Text, View, Button, Image, Pressable, ToastAndroid, TouchableOpacity } from "react-native";
 import React, { useState, useEffect, useRef, useContext } from "react";
 
 import testdel from "./../../assets/testdel.png"
@@ -78,7 +78,7 @@ export default function PosteriorRecording({ navigation, route }) {
     const audioFile = {
       uri: file,
       name: file,
-      type: "video/3gp"
+      type: "audio/mp3"
     }
     payload.append(key, audioFile)
 
@@ -102,9 +102,9 @@ export default function PosteriorRecording({ navigation, route }) {
         }
       });
 
-      setTimeout(() => {
+      // setTimeout(() => {
         setRecordText("");
-      }, 1000)
+      // }, 1000)
 
 
     } catch (error) {
@@ -123,6 +123,7 @@ export default function PosteriorRecording({ navigation, route }) {
       }
 
       const file = recordingsPosterior.find((recording) => recording.id === id).file;
+      
       await AudioPlayer.current.loadAsync({ uri: file }, {}, true);
 
       const playerStatus = await AudioPlayer.current.getStatusAsync();
@@ -133,11 +134,19 @@ export default function PosteriorRecording({ navigation, route }) {
           AudioPlayer.current.playAsync();
           setCurrentSoundId(id);
         }
+       
       }
       AudioPlayer.current.setOnPlaybackStatusUpdate(handlePlaybackStatusUpdate);
 
     } catch (error) {
       console.error("Failed to play sound", error);
+       ToastAndroid.showWithGravityAndOffset(
+        'Failed to play sound!',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+        25,
+        50
+      )
     }
   }
 
@@ -161,13 +170,7 @@ export default function PosteriorRecording({ navigation, route }) {
       }
     } catch (error) {
       console.error("Failed to stop sound", error);
-      ToastAndroid.showWithGravityAndOffset(
-        'Failed to play sound!',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM,
-        25,
-        50
-      )
+     
     }
   }
 
@@ -188,8 +191,22 @@ export default function PosteriorRecording({ navigation, route }) {
     }
   }
 
+  async function highlighToggle(id) {
+    if (isPlaying) {
+      await stopSound();
+      setIsPlaying(false)
+    }
+      setPortionOnFocus(id)
+      btnState[id] = "recording"
+    
+  }
+
   async function startRecording(id, count, setCount, reRec) {
-    if (count === 0) {
+    if (portionOnFocus != id && portionOnFocus != null) {
+      setCount(2)
+      setPortionOnFocus(id)
+    }
+    else if (count === 0) {
       setCount(1)
       setPortionOnFocus(id)
     }
@@ -215,11 +232,27 @@ export default function PosteriorRecording({ navigation, route }) {
           // changing the button state from null to start recoding 
           btnState[id] = "recording"
           setBtnState(btnState)
-          // recording 
+          
+          const { ios, android } = Audio.RecordingOptionsPresets.HIGH_QUALITY;
+          const options = {
+            android: {
+              ...android,
+              extension: '.mp3',
+              sampleRate: 8000,
+              bitRate: 16000,
+            },
+            ios: {
+              ...ios,
+              extension: '.mp3',
+              sampleRate: 8000,
+              bitRate: 16000,
+            },
+          };
+          const { recording } = await Audio.Recording.createAsync(options);
 
-          const { recording } = await Audio.Recording.createAsync(
-            Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-          );
+          // const { recording } = await Audio.Recording.createAsync(
+          //   Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+          // );
           const timerInterval = setInterval(() => {
             setRecordingTime((prevTime) => prevTime - 1);
           }, 1000);
@@ -275,7 +308,6 @@ export default function PosteriorRecording({ navigation, route }) {
         const { sound, status } = await recording.createNewLoadedSoundAsync();
         var file = recording.getURI()
         var recKey = recordingsPosterior[id - 7].key;
-
         if (typeof id != "number") {
           await handlePatientPosteriorRecordingsNew(recKey, file)
         } else {
@@ -342,7 +374,7 @@ export default function PosteriorRecording({ navigation, route }) {
               </>
               :
               <>
-                <Pressable disabled={isRecording} onPress={() => toggleSound(recordingLine.id)} style={[recordingLine.style, styles.button_wrapper]} key={(() => Math.random())()}>
+                <Pressable disabled={isRecording} onPress={() => highlighToggle(recordingLine.id)} style={[recordingLine.style, styles.button_wrapper]} key={(() => Math.random())()}>
                   {portionOnFocus == index + 7 &&
                     <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }} />
                     // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
@@ -357,11 +389,11 @@ export default function PosteriorRecording({ navigation, route }) {
                       <Text style={styles.recordingText}>{formatTime(recordingTime)}</Text>
                     </View>
                     :
-                    <View
+                    <TouchableOpacity onPress={() => toggleSound(recordingLine.id)}
                       style={styles.state}
                     >
                       <Text style={styles.recordingText}>{currentSoundId === recordingLine.id ? <Text>&#9654; Stop</Text> : <Text>&#9654; Play</Text>}</Text>
-                    </View>
+                    </TouchableOpacity>
                   }
 
                 </Pressable>

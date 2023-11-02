@@ -1,4 +1,4 @@
-import { StyleSheet, ScrollView, Text, View, Button, Image, Pressable, ToastAndroid } from "react-native";
+import { StyleSheet, ScrollView, Text, View, Button, Image, Pressable, ToastAndroid, TouchableOpacity } from "react-native";
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { lungs } from "../context/AddPatientContext";
@@ -49,7 +49,7 @@ export default function AnteriorRecording({ route, navigation }) {
 
 
   async function handlePatientAnteriorRecordings() {
-    if (isRecording ) {
+    if (isRecording) {
       ToastAndroid.showWithGravityAndOffset(
         'Recording not completed. Hang in there!',
         ToastAndroid.SHORT,
@@ -57,7 +57,7 @@ export default function AnteriorRecording({ route, navigation }) {
         25,
         50
       )
-    } else if ( isPlaying) {
+    } else if (isPlaying) {
       ToastAndroid.showWithGravityAndOffset(
         'The audio is currently playing. Please wait for it to finish.',
         ToastAndroid.SHORT,
@@ -80,7 +80,7 @@ export default function AnteriorRecording({ route, navigation }) {
     const audioFile = {
       uri: file,
       name: file,
-      type: "video/3gp"
+      type: "audio/mp3"
     }
     payload.append(key, audioFile)
 
@@ -120,7 +120,6 @@ export default function AnteriorRecording({ route, navigation }) {
         })
         setNewlyCreatedPatientLungsId(res?.data?.id)
 
-
         recordings.forEach(async (recordingss, index) => {
           if (recordingss.key == key) {
             const uri = `https://lung.thedelvierypointe.com${res?.data?.[recordingss.key]}`
@@ -131,9 +130,9 @@ export default function AnteriorRecording({ route, navigation }) {
         })
 
       }
-      setTimeout(() => {
+      // setTimeout(() => {
         setRecordText("");
-      }, 1000)
+      // }, 1000)
 
     } catch (error) {
       console.log("eoorr-----------------------------", error)
@@ -199,7 +198,6 @@ export default function AnteriorRecording({ route, navigation }) {
 
   async function toggleSound(id) {
     try {
-
       setPortionOnFocus(id)
       setIsFoucued(true)
       if (currentSoundId !== null && currentSoundId === id) {
@@ -214,10 +212,24 @@ export default function AnteriorRecording({ route, navigation }) {
     }
   }
 
+  async function highlighToggle(id) {
+    if (isPlaying) {
+      await stopSound();
+      setIsPlaying(false)
+    }
+      setPortionOnFocus(id)
+      setIsFoucued(true)
+      btnState[id] = "recording"
+    
+  }
 
   async function startRecording(id, count, setCount, reRec) {
 
-    if (count === 0) {
+    if (portionOnFocus != id && portionOnFocus != null) {
+      setCount(2)
+      setPortionOnFocus(id)
+    }
+    else if (count === 0) {
       setCount(1)
       setPortionOnFocus(id)
     }
@@ -242,10 +254,28 @@ export default function AnteriorRecording({ route, navigation }) {
           // changing the button state from null to start recoding 
           btnState[id] = "recording"
           setBtnState(btnState)
-          // recording 
-          const { recording } = await Audio.Recording.createAsync(
-            Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-          );
+
+          const { ios, android } = Audio.RecordingOptionsPresets.HIGH_QUALITY;
+          const options = {
+            android: {
+              ...android,
+              extension: '.mp3',
+              sampleRate: 8000,
+              bitRate: 16000,
+            },
+            ios: {
+              ...ios,
+              extension: '.mp3',
+              sampleRate: 8000,
+              bitRate: 16000,
+            },
+          };
+          const { recording } = await Audio.Recording.createAsync(options);
+
+          // const { recording } = await Audio.Recording.createAsync(
+          //   Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+          // );
+
           const timerInterval = setInterval(() => {
             setRecordingTime((prevTime) => prevTime - 1);
           }, 1000);
@@ -305,6 +335,7 @@ export default function AnteriorRecording({ route, navigation }) {
         const { sound, status } = await recording.createNewLoadedSoundAsync();
         var file = recording.getURI()
         var recKey = recordings[id].key;
+
         if (typeof id != "number") {
           await handlePatientAnteriorRecordingsNew(recKey, file)
         } else {
@@ -372,7 +403,7 @@ export default function AnteriorRecording({ route, navigation }) {
               </>
               :
               <>
-                <Pressable disabled={isRecording} onPress={() => toggleSound(index)} style={[recordingLine.style, styles.button_wrapper]} key={(() => Math.random())()}>
+                <Pressable disabled={isRecording} onPress={() => highlighToggle(index)} style={[recordingLine.style, styles.button_wrapper]} key={(() => Math.random())()}>
                   {portionOnFocus == index &&
                     <View style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.25 }} />
                     // <Image style={{ ...styles.backimg, backgroundColor: "#fff", opacity: 0.17 }} source={testdel} />
@@ -387,11 +418,11 @@ export default function AnteriorRecording({ route, navigation }) {
                       <Text style={styles.recordingText}>{formatTime(recordingTime)}</Text>
                     </View>
                     :
-                    <View
+                    <TouchableOpacity onPress={() => toggleSound(index)}
                       style={styles.state}
                     >
                       <Text style={styles.recordingText}>{currentSoundId === index ? <><Text>&#9654; Stop</Text></> : <Text>&#9654; Play</Text>}</Text>
-                    </View>
+                    </TouchableOpacity>
                   }
 
                 </Pressable>
@@ -425,7 +456,7 @@ export default function AnteriorRecording({ route, navigation }) {
         <Text style={rereording.recordingPosition}>Position : {portionOnFocus}</Text>
         <Pressable style={rereording.reRecording} disabled={isRecording || !isFoucued || isPlaying || !btnState[portionOnFocus]} onPress={() => startRecording(portionOnFocus, 1, '', 're-record')}>
           <Text style={(isRecording || !isFoucued || isPlaying || !btnState[portionOnFocus]) ? rereording.reRecordingActive : rereording.reRecordingText}>
-            <FontAwesome name="rotate-left" /> Re-record
+            <FontAwesome name="rotate-left" /> Re-record 
           </Text>
         </Pressable>
       </View>

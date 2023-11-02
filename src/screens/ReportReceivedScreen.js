@@ -1,5 +1,5 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Pressable, Image } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Pressable, Image, ToastAndroid } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
 import { SubTitle, Title } from '../components/Atoms/Typography';
 import metrics from '../constants/layout';
 import fonts from '../constants/fontsSize';
@@ -17,7 +17,8 @@ import LoadingScreen from '../components/Atoms/LoadingScreen';
 
 export default function ReportReceivedScreen({ navigation, route }) {
 
-  const sound = new Audio.Sound()
+  const sound = useRef(new Audio.Sound())
+
   const ShareDataId = route?.params?.ShareDataId;
 
   const [loading, setLoading] = useState(true);
@@ -526,33 +527,61 @@ export default function ReportReceivedScreen({ navigation, route }) {
   async function playSound(track, id) {
     try {
       const uri = `https://lung.thedelvierypointe.com${track}`
-      if (+currentSoundId === id) {
+      if (currentSoundId === id) {
         setCurrentSoundId("no track")
-        //  sound.stopAsync()
-        sound.unloadAsync()
+        await stopSound()
 
       } else {
-        if (sound.isPlaying) {
-          sound.stopAsync()
+        if (currentSoundId != id) {
+          await stopSound()
         }
-        await sound.loadAsync({
-          uri
-        })
-        await sound.playAsync();
-        setCurrentSoundId(id);
+        await sound.current.loadAsync({ uri: uri }, {}, true);
+
+        const playerStatus = await sound.current.getStatusAsync();
+
+        if (playerStatus.isLoaded) {
+          if (playerStatus.isPlaying === false) {
+            sound.current.playAsync();
+            setCurrentSoundId(id);
+          }
+          else {
+            await stopSound()
+          }
+        }
+        sound.current.setOnPlaybackStatusUpdate(handlePlaybackStatusUpdate);
+
       }
     } catch (error) {
       console.error("Failed to play sound", error);
+      ToastAndroid.showWithGravityAndOffset(
+        'Failed to play sound!',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+        25,
+        50
+      )
     }
   }
 
-  useEffect(() => {
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.didJustFinish) {
+  async function stopSound() {
+    try {
+      const playerStatus = await sound.current.getStatusAsync();
+
+      if (playerStatus.isLoaded === true) {
+        await sound.current.unloadAsync()
         setCurrentSoundId(null);
       }
-    });
-  }, [sound]);
+    } catch (error) {
+      console.error("Failed to stop sound", error);
+    }
+  }
+
+  async function handlePlaybackStatusUpdate(status) {
+    if (status.isLoaded && !status.isPlaying && status.didJustFinish) {
+      await sound.current.unloadAsync();
+      setCurrentSoundId(null);
+    }
+  }
 
 
   function getAnteriorRecordingLines() {

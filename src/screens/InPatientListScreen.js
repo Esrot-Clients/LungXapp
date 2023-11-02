@@ -62,13 +62,13 @@ export default function InPatientDetails({ navigation }) {
   return (
     <View style={styles.container}>
 
-      <SearchBar handleFiltering={handleFiltering} handleDateFilter={handleDateFilter}/>
+      <SearchBar handleFiltering={handleFiltering} handleDateFilter={handleDateFilter} />
 
       <FlatList
         showsVerticalScrollIndicator={false}
         data={data}
-        renderItem={({ item }) => <PatientDetailsCard item={item} showView={true} onPress={() => navigation.navigate('In Patient Session Details', { item })} 
-        onPressEdit={() =>{resetStateObj(); navigation.navigate('Add Patient', { existedPatientId: item.id, existedPatientHealthId: item.patienthealthdata?.[item.patienthealthdata?.length - 1].id })}} />}
+        renderItem={({ item }) => <PatientDetailsCard item={item} showView={true} onPress={() => navigation.navigate('In Patient Session Details', { item })}
+          onPressEdit={() => { resetStateObj(); navigation.navigate('Add Patient', { existedPatientId: item.id, existedPatientHealthId: item.patienthealthdata?.[item.patienthealthdata?.length - 1].id }) }} />}
         // keyExtractor={item => item.toString()}
         // ListHeaderComponent={()=> <SearchBar/>}
         ListFooterComponent={() => (
@@ -77,9 +77,12 @@ export default function InPatientDetails({ navigation }) {
               <Button.BtnContain
                 label="Add Patient"
                 color={colors.green}
-                onPress={() => navigation.navigate('Add Patient', {
-                  screenType: 'Entry Point',
-                })}
+                onPress={async () => {
+                  await resetStateObj()
+                  navigation.navigate('Add Patient', {
+                    screenType: 'Entry Point',
+                  })
+                }}
               />
             </View>
           </View>

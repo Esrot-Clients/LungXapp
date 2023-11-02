@@ -42,7 +42,7 @@ export default function AnteriorTagging({ route, navigation }) {
 
   const [currrentStep, setCurrentStep] = useState(2);
 
-  const [alltagVisible, setallTagVisible] = useState(false);
+  const [alltagVisible, setallTagVisible] = useState(true);
 
   const [activeLungsection, setActiveLungsection] = useState(null)
 
@@ -105,7 +105,8 @@ export default function AnteriorTagging({ route, navigation }) {
               ele.id == index + 1 &&
 
               ele.options.map(option => (
-                option.isChecked && option.id != 6 && option.id != 5 &&
+                option.isChecked && option.id != 6 && 
+                // option.id != 5 &&
                 <>
                   <Text key={(() => Math.random())()} style={lungs.tags}>{option.position}</Text>
                 </>
@@ -251,7 +252,7 @@ export default function AnteriorTagging({ route, navigation }) {
                         key={(() => Math.random())()}
                         style={{
                           alignItems: "flex-start",
-                          paddingHorizontal: 10,
+                          paddingHorizontal: 5,
                           paddingVertical: 5,
                           // width: 130,
                           marginLeft: 3,
@@ -268,11 +269,12 @@ export default function AnteriorTagging({ route, navigation }) {
                               handleAnteriorPositionTagging(
                                 position.id,
                                 symptom.id,
-                                state
+                                state,
+                                symptom.isChecked
                               );
                             }}
                           />
-                          <View style={{ width: 5 }} />
+                          <View style={{ width: 2 }} />
                           <Typography.SubTitle size={fonts.font10}>
                             {symptom.position}
                           </Typography.SubTitle>
@@ -307,9 +309,9 @@ export default function AnteriorTagging({ route, navigation }) {
                     key={(() => Math.random())()}
                     style={{
                       alignItems: "flex-start",
-                      paddingHorizontal: 10,
+                      paddingHorizontal: 6,
                       paddingVertical: 5,
-                      // width: 130, 
+                      // width: 120, 
                       marginLeft: 3,
                     }}
                   >
@@ -320,7 +322,7 @@ export default function AnteriorTagging({ route, navigation }) {
                         status={symptom.isChecked ? 'checked' : 'unchecked'}
                         tintColors={{ true: colors.green, false: "grey" }}
                         onPress={(state) => {
-                          handleTaggingAllAnteriorPosition(symptom.position, state);
+                          handleTaggingAllAnteriorPosition(symptom.position, state ,symptom.isChecked);
                         }}
                       >
 

@@ -178,7 +178,7 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
                       onPress={() => {
                         resetStateObj();
                         // navigation.navigate('In Patient Details Session', { item: patientDetail?.[0], detailItem: item })
-                        navigation.navigate("Add Patient", { existedPatientId: patientDetail?.[0]?.id, session: item?.session?.session, existedPatientHealthId: item?.session?.id })
+                        navigation.navigate("Add Patient", { existedPatientId: patientDetail?.[0]?.id, session: item?.session?.session, existedPatientHealthId: item?.session?.id, existedSessionCreatedData:item?.session?.created_at })
                       }}>
                       <Typography.Title size={fonts.font12} color={colors.green} >
                         Edit
@@ -231,18 +231,21 @@ export default function InPatientSessionsDetailsScreen({ navigation, route }) {
           alignItems: 'center',
           justifyContent: 'flex-end',
         }}>
-        <View style={{ marginHorizontal: 10 }}>
+        <View style={{ marginHorizontal: 10, marginVertical:10 }}>
           <Typography.Title color={colors.black} size={fonts.font12}>
             Choose Patient Status :
           </Typography.Title>
         </View>
-        <DropdownComponent
+        {/* <DropdownComponent
           dropdowndata={data}
           width={metrics.screenWidth / 2.6}
           onDropdownChange={() => { }}
           placeholder="Status"
           value={'In-patient'}
-        />
+        /> */}
+        <Typography.Title color={colors.green} size={fonts.font14}>
+          In-Patient 
+          </Typography.Title>
       </View>
 
       {dayAndSessionFilter.length > 0 && dayAndSessionFilter.map((item, index, arr) => (

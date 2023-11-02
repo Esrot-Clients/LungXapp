@@ -1,5 +1,5 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import React, { useState, useEffect, useContext } from 'react';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, ToastAndroid } from 'react-native';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import colors from '../constants/colors';
 import { SubTitle, Title } from '../components/Atoms/Typography';
 import metrics from '../constants/layout';
@@ -24,7 +24,7 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
   const detailItem = route?.params?.detailItem;
   const focused = useIsFocused()
   const { user } = useContext(AuthContext);
-  const sound = new Audio.Sound()
+  const sound = useRef(new Audio.Sound());
 
   const [recordings, setRecordings] = useState([
     {
@@ -137,7 +137,7 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
       headers: {
         "Content-Type": "multipart/form-data"
       }
-    }).then(res => { setPatientDetail(res?.data) }).catch(err => err)
+    }).then(res => {setPatientDetail(res?.data);}).catch(err => err)
   }
 
   const getPatientLungsSessionDetail = async () => {
@@ -195,34 +195,63 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
   async function playSound(track, id) {
     try {
       const uri = `https://lung.thedelvierypointe.com${track}`
-      if (+currentSoundId === id) {
+      if (currentSoundId === id) {
         setCurrentSoundId("no track")
-        // sound.stopAsync()
-        sound.unloadAsync()
+        await stopSound()
 
       } else {
-        if (sound.isPlaying) {
-          sound.stopAsync()
+        if (currentSoundId != id) {
+          await stopSound()
         }
-        await sound.loadAsync({
-          uri
-        })
-        await sound.playAsync();
-        setCurrentSoundId(id);
+        await sound.current.loadAsync({ uri: uri }, {}, true);
+
+        const playerStatus = await sound.current.getStatusAsync();
+
+        if (playerStatus.isLoaded) {
+          if (playerStatus.isPlaying === false) {
+            sound.current.playAsync();
+            setCurrentSoundId(id);
+          }
+          else {
+            await stopSound()
+          }
+        }
+        sound.current.setOnPlaybackStatusUpdate(handlePlaybackStatusUpdate);
       }
     } catch (error) {
       console.error("Failed to play sound", error);
+      ToastAndroid.showWithGravityAndOffset(
+        'Failed to play sound!',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+        25,
+        50
+      )
     }
   }
 
-  useEffect(() => {
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.didJustFinish) {
+  async function stopSound() {
+    try {
+      const playerStatus = await sound.current.getStatusAsync();
+
+      if (playerStatus.isLoaded === true) {
+        await sound.current.unloadAsync()
         setCurrentSoundId(null);
       }
-    });
-  }, [sound]);
+    } catch (error) {
+      console.error("Failed to stop sound", error);
 
+    }
+  }
+
+  async function handlePlaybackStatusUpdate(status) {
+    if (status.isLoaded && !status.isPlaying && status.didJustFinish) {
+      await sound.current.unloadAsync();
+      setCurrentSoundId(null);
+    }
+  }
+
+  
   function getAnteriorRecordingLines() {
     return recordings.map((recordingLine, index) => {
 
@@ -325,7 +354,7 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
         <Textinput
           width={metrics.screenWidth * 0.43}
           label="Oxygen saturation(SpO2)" editable={false}
-          value={patientDetail?.patienthealthdata?.oxygen_saturation + "%"}
+          value={patientDetail?.patienthealthdata?.oxygen_saturation? patientDetail?.patienthealthdata?.oxygen_saturation + "%":""}
         />
         <Textinput
           width={metrics.screenWidth * 0.43}

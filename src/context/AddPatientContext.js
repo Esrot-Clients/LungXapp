@@ -1124,14 +1124,44 @@ export const AddPatientProvider = ({ children }) => {
   }
 
 
-  const handleTaggingAllAnteriorPosition = (symptomsName, state) => {
+  const handleTaggingAllAnteriorPosition = (symptomsName, state, checkStatus) => {
     const newtag = tags.map((symptoms) => {
-      if (symptomsName === "All" && state) {
+      if (symptomsName === "All" && state && !checkStatus) {
+        if (symptoms.id == 5) {
+          return { ...symptoms, isChecked: false }
+        } else {
+          return { ...symptoms, isChecked: true }
+        }
+      }
+      else if (symptomsName === "All" && state && checkStatus) {
+        if (symptoms.id != 5) {
+          return { ...symptoms, isChecked: false }
+        }
+      }
+      else if (symptomsName === "Normal" && state && !checkStatus) {
+        if (symptoms.id == 5) {
+          return { ...symptoms, isChecked: true }
+        } else {
+          return { ...symptoms, isChecked: false }
+        }
+      }
+      else if (symptomsName === "Normal" && state && checkStatus) {
+        if (symptoms.id == 5) {
+          return { ...symptoms, isChecked: false }
+        }
+      }
+      else if (symptoms.position == symptomsName && checkStatus) {
+        return { ...symptoms, isChecked: false }
+      }
+      else if (symptoms.position == symptomsName && !checkStatus) {
         return { ...symptoms, isChecked: true }
       }
-      else if (symptoms.position == symptomsName) {
-        return { ...symptoms, isChecked: !symptoms.isChecked }
-      } 
+      else if (symptoms.id == 5 && symptoms.isChecked == true) {
+        return { ...symptoms, isChecked: false }
+      }
+      else if (symptoms.id == 6 && symptoms.isChecked == true) {
+        return { ...symptoms, isChecked: false }
+      }
       else if (symptoms.position == symptomsName && !state) {
         return { ...symptoms, isChecked: false }
       }
@@ -1142,11 +1172,41 @@ export const AddPatientProvider = ({ children }) => {
 
     const newAnteriorTagging = AnteriorTagging.map((position) => {
       const newAnteriorOption = position.options.map((symptoms) => {
-        if (symptomsName === "All" && state) {
+        if (symptomsName === "All" && state && !checkStatus) {
+          if (symptoms.id == 5) {
+            return { ...symptoms, isChecked: false }
+          } else {
+            return { ...symptoms, isChecked: true }
+          }
+        }
+        else if (symptomsName === "All" && state && checkStatus) {
+          if (symptoms.id != 5) {
+            return { ...symptoms, isChecked: false }
+          }
+        }
+        else if (symptomsName === "Normal" && state && !checkStatus) {
+          if (symptoms.id == 5) {
+            return { ...symptoms, isChecked: true }
+          } else {
+            return { ...symptoms, isChecked: false }
+          }
+        }
+        else if (symptomsName === "Normal" && state && checkStatus) {
+          if (symptoms.id == 5) {
+            return { ...symptoms, isChecked: false }
+          }
+        }
+        else if (symptoms.position === symptomsName && state && checkStatus) {
+          return { ...symptoms, isChecked: false }
+        }
+        else if (symptoms.position === symptomsName && state && !checkStatus) {
           return { ...symptoms, isChecked: true }
         }
-        else if (symptoms.position === symptomsName && state) {
-          return { ...symptoms, isChecked: !symptoms.isChecked }
+        else if (symptoms.id == 5 && symptoms.isChecked == true) {
+          return { ...symptoms, isChecked: false }
+        }
+        else if (symptoms.id == 6 && symptoms.isChecked == true) {
+          return { ...symptoms, isChecked: false }
         }
         else if (symptoms.position === symptomsName && !state) {
           return { ...symptoms, isChecked: false }
@@ -1176,14 +1236,38 @@ export const AddPatientProvider = ({ children }) => {
 
   //Anterior Tagging controller runs on  input changes (checkboxes)
 
-  const handleAnteriorPositionTagging = (positionid, optionid, state) => {
+  const handleAnteriorPositionTagging = (positionid, optionid, state, checkStatus) => {
 
     const newAnteriorTagging = AnteriorTagging.map((position) => {
 
-      if (position.id === positionid && optionid != 6) {
-
+      if (optionid == 5 && position.id === positionid) {
         const newOptions = position.options.map((option) => {
-          if (option.id === optionid) {
+          if (!state) {
+            return { ...option, isChecked: false };
+          }
+          if (state && !checkStatus) {
+            if (option.id == 5) {
+              return { ...option, isChecked: true };
+            } else {
+            return { ...option, isChecked: false };
+            }
+          }
+          else if(state && checkStatus){
+            return { ...option, isChecked: false };
+          }
+          return option;
+        });
+        return { ...position, options: newOptions };
+      }
+
+      if (position.id === positionid && optionid != 6) {
+        const newOptions = position.options.map((option) => {
+          if (option.id === 5 && option.isChecked ) {
+            return { ...option, isChecked: false };
+          }else if (option.id === 6 && option.isChecked ) {
+            return { ...option, isChecked: false };
+          }
+          else if (option.id === optionid) {
             return { ...option, isChecked: !option.isChecked };
           }
 
@@ -1191,13 +1275,21 @@ export const AddPatientProvider = ({ children }) => {
         });
         return { ...position, options: newOptions };
       }
+     
       if (optionid == 6 && position.id === positionid) {
         const newOptions = position.options.map((option) => {
           if (!state) {
             return { ...option, isChecked: false };
           }
-          if (state) {
+          if (state && !checkStatus) {
+            if (option.id == 5) {
+              return { ...option, isChecked: false };
+            } else {
             return { ...option, isChecked: true };
+            }
+          }
+          else if(state && checkStatus){
+            return { ...option, isChecked: false };
           }
           return option;
         });
@@ -1251,7 +1343,7 @@ export const AddPatientProvider = ({ children }) => {
   const handlePosteriorfiltering = ({ id, doctor, patient }) => {
     const filteredPosteriorTaggingData = PosteriorTagging.map((item) => {
       const selectedOptions = item.options.filter((option) => option.isChecked && option.id != 5 && option.id != 6);
-     
+
       if (selectedOptions.length > 0) {
         return {
           id: item.id,
@@ -2085,7 +2177,7 @@ export const lungs = StyleSheet.create({
     width: "100%",
     height: "100%",
     aspectRatio: 8 / 9,
-    zIndex: 10
+    zIndex: 10,
   },
   btn: {
     position: "absolute"
