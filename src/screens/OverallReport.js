@@ -370,8 +370,8 @@ export default function OverallReport({ navigation, route }) {
           </View>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 10 }}>
-            <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
             <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
+            <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
           </View>
 
           <View style={lungs.wrapper}>
@@ -409,8 +409,8 @@ export default function OverallReport({ navigation, route }) {
           </View>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 10 }}>
-            <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
             <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+            <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
           </View>
 
           <View style={lungs.wrapper}>

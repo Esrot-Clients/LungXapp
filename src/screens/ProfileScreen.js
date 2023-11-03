@@ -1,8 +1,8 @@
-import {StyleSheet, Text, ToastAndroid, View,ScrollView} from 'react-native';
-import React, {useContext, useState} from 'react';
-import {AuthContext} from '../context/AuthContext';
+import { StyleSheet, Text, ToastAndroid, View, ScrollView, StatusBar } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import UserInfoCard from '../components/Molecules/UserInfoCard';
-import {BtnContain} from '../components/Atoms/Button';
+import { BtnContain } from '../components/Atoms/Button';
 import metrics from '../constants/layout';
 import TextinputwithEditButton from '../components/Molecules/TextInputWithEdit';
 import colors from '../constants/colors';
@@ -13,36 +13,72 @@ import LoadingScreen from '../components/Atoms/LoadingScreen';
 export default function ProfileScreen() {
 
   const [loading, setloading] = useState(false);
-  const {user, setUser, DoctorLogout, loadingactivity} = useContext(AuthContext);
-  const [name, setname] = useState(user?.first_name);
+  const { user, setUser, DoctorLogout, loadingactivity } = useContext(AuthContext);
+  const [firstName, setfirstName] = useState(user?.first_name);
+  const [lastName, setLastName] = useState(user?.last_name);
   const [phno, setphno] = useState(user?.mobile);
   const [email, setemail] = useState(user?.email);
   const [address, setaddress] = useState(user?.address);
- 
+  const [city, setCity] = useState(user?.city);
+  const [hospitalName, setHospitalName] = useState(user?.hospital);
+  const [speciality, setSpeciality] = useState(user?.doc_dept);
+
+  const handleUpdateUserFirstName = async () => {
+    try {
+      setloading(false)
+      const response = await LungXinstance.patch('api/update_user_info/', {
+        first_name: firstName,
+      });
+      if (response?.data) {
+        setUser({
+          ...user,
+          first_name: response?.data?.first_name,
+        })
+        await AsyncStorage.mergeItem(
+          'user',
+          JSON.stringify({
+            first_name: response?.data?.first_name,
+          }),
+        );
+        ToastAndroid.show('First Name Updated', ToastAndroid.LONG);
+      }
+      setloading(false)
 
 
-  const handleTextInput = (text) => {
-    console.log(text);
-    setname(text);
+    } catch (err) {
+      console.log("Error Occurred", err);
+      ToastAndroid.show('Error', ToastAndroid.LONG);
+      setloading(false)
+    }
   };
-  const handlepTextInput = (text) => {
-    console.log(text);
-    setphno(text)
-  };
 
-  const handleeTextInput = (text) => {
-    console.log(text);
-    setemail(text)
-  };
+  const handleUpdateUserLastName = async (text) => {
+    try {
+      setloading(false)
+      const response = await LungXinstance.patch('api/update_user_info/', {
+        last_name: text,
+      });
+      if (response?.data) {
+        setUser({
+          ...user,
+          last_name: response?.data?.last_name,
+        })
+        await AsyncStorage.mergeItem(
+          'user',
+          JSON.stringify({
+            last_name: response?.data?.last_name,
+          }),
+        );
+        ToastAndroid.show('Last Name Updated', ToastAndroid.LONG);
+      }
+      setloading(false)
 
-  const handleaTextInput = (text) => {
-    console.log(text);
-    setaddress(text)
-  };
 
-  const handleCancel = (initialValue) => {
-    // Update the state in the parent component
-    setname(initialValue);
+    } catch (err) {
+      console.log("Error Occurred", err);
+      ToastAndroid.show('Error', ToastAndroid.LONG);
+      setloading(false)
+    }
   };
 
   const handleUpdateUserMobileNumber = async (text) => {
@@ -51,114 +87,202 @@ export default function ProfileScreen() {
       const response = await LungXinstance.patch('api/update_user_info/', {
         mobile: text,
       });
-      // console.log(JSON.stringify(response.data, null, 2));
-      setUser({
-        ...user,
-        mobile: text,
-      })
-      await AsyncStorage.mergeItem(
-        'user',
-        JSON.stringify({
-          mobile: text,
-        }),
-      );
-      ToastAndroid.show('Phone Number Updated', ToastAndroid.LONG);
+      if (response?.data) {
+        setUser({
+          ...user,
+          mobile: response?.data?.mobile,
+        })
+        await AsyncStorage.mergeItem(
+          'user',
+          JSON.stringify({
+            mobile: response?.data?.mobile,
+          }),
+        );
+        ToastAndroid.show('Mobile Number Updated', ToastAndroid.LONG);
+      }
       setloading(false)
 
     } catch (err) {
-      console.log("Error Occurred",err);
+      console.log("Error Occurred", err);
       ToastAndroid.show('Error', ToastAndroid.LONG);
       setloading(false)
     }
   };
 
-  const handleUpdateUserEmailAddress = async (text) => {
+  const handleUpdateUserAddress = async (text) => {
     try {
       setloading(false)
       const response = await LungXinstance.patch('api/user_profile/', {
-        email: text,
+        address: text,
       });
-      // console.log(JSON.stringify(response.data, null, 2));
-      setUser({
-        ...user,
-        email: text,
-      })
-      await AsyncStorage.mergeItem(
-        'user',
-        JSON.stringify({
-          email: text,
-        }),
-      );
-      ToastAndroid.show('Email Address Updated', ToastAndroid.LONG);
+      if (response?.data) {
+        setUser({
+          ...user,
+          address: response?.data?.address,
+        })
+        await AsyncStorage.mergeItem(
+          'user',
+          JSON.stringify({
+            address: response?.data?.address,
+          }),
+        );
+        ToastAndroid.show('Address Updated', ToastAndroid.LONG);
+      }
       setloading(false)
 
     } catch (err) {
-      console.log("Error Occurred",err);
+      console.log("Error Occurred", err);
       ToastAndroid.show('Error', ToastAndroid.LONG);
       setloading(false)
     }
   };
-  const handleUpdateUserName = async (text) => {
+
+  const handleUpdateUserCity = async (text) => {
     try {
       setloading(false)
-      const response = await LungXinstance.patch('api/update_user_info/', {
-        first_name: text,
+      const response = await LungXinstance.patch('api/user_profile/', {
+        city: text,
       });
-      setUser({
-        ...user,
-        first_name: text,
-      })
-      await AsyncStorage.mergeItem(
-        'user',
-        JSON.stringify({
-          first_name: text,
-        }),
-      );
-      ToastAndroid.show('Name Updated', ToastAndroid.LONG);
+      if (response?.data) {
+        setUser({
+          ...user,
+          city: response?.data?.city,
+        })
+        await AsyncStorage.mergeItem(
+          'user',
+          JSON.stringify({
+            city: response?.data?.city,
+          }),
+        );
+        ToastAndroid.show('City Updated', ToastAndroid.LONG);
+      }
       setloading(false)
 
     } catch (err) {
-      console.log("Error Occurred",err);
+      console.log("Error Occurred", err);
       ToastAndroid.show('Error', ToastAndroid.LONG);
       setloading(false)
     }
   };
 
-  
+  const handleUpdateUserSpecility = async (text) => {
+    try {
+      setloading(false)
+      const response = await LungXinstance.patch('api/user_profile/', {
+        doc_dept: text,
+      });
+      if (response?.data) {
+        setUser({
+          ...user,
+          doc_dept: response?.data?.doc_dept,
+        })
+        await AsyncStorage.mergeItem(
+          'user',
+          JSON.stringify({
+            doc_dept: response?.data?.doc_dept,
+          }),
+        );
+        ToastAndroid.show('Speciality Updated', ToastAndroid.LONG);
+      }
+      setloading(false)
+
+    } catch (err) {
+      console.log("Error Occurred", err);
+      ToastAndroid.show('Error', ToastAndroid.LONG);
+      setloading(false)
+    }
+  };
+
+  const handleUpdateUserHospital = async (text) => {
+    try {
+      setloading(false)
+      const response = await LungXinstance.patch('api/user_profile/', {
+        hospital: text,
+      });
+      if (response?.data) {
+        setUser({
+          ...user,
+          hospital: response?.data?.hospital,
+        })
+        await AsyncStorage.mergeItem(
+          'user',
+          JSON.stringify({
+            hospital: response?.data?.hospital,
+          }),
+        );
+        ToastAndroid.show('Hospital Name Updated', ToastAndroid.LONG);
+      }
+      setloading(false)
+
+    } catch (err) {
+      console.log("Error Occurred", err);
+      ToastAndroid.show('Error', ToastAndroid.LONG);
+      setloading(false)
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+
+      <StatusBar backgroundColor={'#fff'}  barStyle="dark-content" />
+
       {/* {
         loading ? <LoadingScreen /> : null
       } */}
-      <UserInfoCard  profile={user?.profile_picture}/>
+
+      <UserInfoCard />
+
       <TextinputwithEditButton
-        label="Name"
-        value={name}
-        onUpdate={handleUpdateUserName}
-        handleonChangeText={handlepTextInput}
-        onCancel={handleCancel}
+        label="First Name"
+        value={firstName}
+        onUpdate={handleUpdateUserFirstName}
+        handleonChangeText={(txt) => setfirstName(txt)}
       />
       <TextinputwithEditButton
-        label="Phone number"
+        label="Last Name"
+        value={lastName}
+        onUpdate={handleUpdateUserLastName}
+        handleonChangeText={(txt) => setLastName(txt)}
+      />
+
+      <TextinputwithEditButton
+        label="Mobile Number"
         value={phno}
+        keyboardtype="numeric"
         onUpdate={handleUpdateUserMobileNumber}
-        handleonChangeText={handlepTextInput}
-        onCancel={() => {}}
+        handleonChangeText={(txt) => setphno(txt)}
       />
       <TextinputwithEditButton
         label="Email address"
         value={email}
-        onUpdate={handleUpdateUserEmailAddress}
-        handleonChangeText={handleeTextInput}
-        onCancel={() => {}}
+        emailEditHide={true}
       />
       <TextinputwithEditButton
         label="Address"
         value={address}
-        onUpdate={() => {}}
-        handleonChangeText={handleaTextInput}
-        onCancel={() => {}}
+        onUpdate={handleUpdateUserAddress}
+        handleonChangeText={(txt) => setaddress(txt)}
+      />
+
+      <TextinputwithEditButton
+        label="City"
+        value={city}
+        onUpdate={handleUpdateUserCity}
+        handleonChangeText={(txt) => setCity(txt)}
+      />
+
+      <TextinputwithEditButton
+        label="Speciality"
+        value={speciality}
+        onUpdate={handleUpdateUserSpecility}
+        handleonChangeText={(txt) => setSpeciality(txt)}
+      />
+
+      <TextinputwithEditButton
+        label="Hospital Name"
+        value={hospitalName}
+        onUpdate={handleUpdateUserHospital}
+        handleonChangeText={(txt) => setHospitalName(txt)}
       />
 
       {
@@ -167,7 +291,7 @@ export default function ProfileScreen() {
         )
       }
 
-      <View style={{width: metrics.screenWidth * 0.4}}>
+      <View style={{ width: metrics.screenWidth * 0.4, margin: 15 }}>
         <BtnContain
           label="logout"
           icon="logout"
@@ -186,5 +310,5 @@ const styles = StyleSheet.create({
     padding: 20,
     marginVertical: 15,
   },
-  
+
 });

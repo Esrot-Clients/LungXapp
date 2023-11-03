@@ -1,10 +1,11 @@
-import {StyleSheet, Text, View, TextInput, TouchableOpacity} from 'react-native';
-import React, {useState} from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
 import metrics from '../../constants/layout';
 import fonts from '../../constants/fontsSize';
 import colors from '../../constants/colors';
 import * as Typography from '../Atoms/Typography';
-import {BtnContain, BtnOutline, BtnText} from '../Atoms/Button';
+import { BtnContain, BtnOutline, BtnText } from '../Atoms/Button';
+import { AuthContext } from '../../context/AuthContext';
 
 
 // interface Props {
@@ -25,12 +26,13 @@ export const TextinputwithEditButton = ({
   handleonChangeText,
   onUpdate,
   onCancel,
+  emailEditHide,
+  keyboardtype
 }) => {
 
   const [text, setText] = useState(value)
   const [cancelledStateText, setcancelledStateText] = useState(value)
   const [editable, seteditable] = useState(false);
-
 
   const handleEdit = () => {
     seteditable(true);
@@ -39,30 +41,24 @@ export const TextinputwithEditButton = ({
   const handleUpdate = () => {
     seteditable(false);
     onUpdate && onUpdate(text)
-    // Perform any necessary update logic here
+    setcancelledStateText(text)
   };
 
   const handleCancel = () => {
     seteditable(false);
     setText(cancelledStateText);
-    onCancel && onCancel(cancelledStateText)
   };
 
-
-
-
   const handleChangeText = (textvalue) => {
-    // console.log("value", textvalue)
     setText(textvalue);
-    // console.log("text",text)
     handleonChangeText && handleonChangeText(textvalue);
   };
 
 
   return (
-    <View style={{marginVertical: 10}}>
+    <View style={{ marginVertical: 10 }}>
       {label ? <BtnText label={label} color={colors.green} /> : null}
-      <View style={[styles.textinput, {marginTop: label ? -5 : 0}]}>
+      <View style={[styles.textinput, { marginTop: label ? -5 : 0 }]}>
         <TextInput
           editable={editable}
           style={[
@@ -72,18 +68,19 @@ export const TextinputwithEditButton = ({
             },
           ]}
           value={text}
-          onChangeText={setText}
+          onChangeText={handleChangeText}
           onSubmitEditing={handleUpdate}
           placeholderTextColor="gray"
           autoCapitalize="none"
           multiline={height ? true : false}
+          keyboardType={keyboardtype}
         />
-        {!editable ? (
-                  <View style={{flex: 1, alignItems: 'flex-end', marginRight: 5}}>
-                  <TouchableOpacity onPress={handleEdit}>
-                    <Typography.SubTitle>Edit</Typography.SubTitle>
-                  </TouchableOpacity>
-                </View>
+        {!editable && !emailEditHide ? (
+          <View style={{ flex: 1, alignItems: 'flex-end', marginRight: 5 }}>
+            <TouchableOpacity onPress={handleEdit}>
+              <Typography.SubTitle>Edit</Typography.SubTitle>
+            </TouchableOpacity>
+          </View>
         ) : null}
       </View>
       {editable ? (
@@ -93,15 +90,15 @@ export const TextinputwithEditButton = ({
             justifyContent: 'space-between',
             marginTop: 10,
           }}>
-          <View style={{width: metrics.screenWidth * 0.9 / 2}}>
+          <View style={{ width: metrics.screenWidth * 0.9 / 2 }}>
             <BtnContain
               label="Update"
               color={colors.green}
-              disabled={text == value}
+              // disabled={text == value}
               onPress={handleUpdate}
             />
           </View>
-          <View style={{flex: 1, alignItems: 'flex-end'}}>
+          <View style={{ flex: 1, alignItems: 'flex-end' }}>
             <BtnOutline
               label="Cancel"
               color={colors.green}

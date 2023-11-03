@@ -379,9 +379,9 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
           </Title>
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 20 }}>
-          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
           <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
-        </View>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+          </View>
         <View style={lungs.wrapper}>
           <View style={lungs.btn_wrapper}>
             {getAnteriorRecordingLines()}
@@ -400,9 +400,9 @@ export default function OutPatientsDetailsScreen({ navigation, route }) {
           </Title>
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 20 }}>
-          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
           <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
-        </View>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
+          </View>
         <View style={lungsPosterior.wrapper}>
           <View style={lungsPosterior.btn_wrapper}>
             {getPosteriorRecordingLines()}

@@ -32,14 +32,15 @@ export default function AnnotationScreen({ navigation }) {
           style={{
             alignItems: 'center',
             flexDirection: 'row',
-            marginRight: 30,
+            // marginRight: 30,
+            marginRight: 10,
           }}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => {
               navigation.goBack();
             }}>
             <MaterialIcons name="arrow-back" size={25} color={colors.black} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       ),
     }, [navigation]);

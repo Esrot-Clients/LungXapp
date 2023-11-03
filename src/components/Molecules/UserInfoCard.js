@@ -1,28 +1,23 @@
-import * as React from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, Pressable } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, Pressable, ToastAndroid } from 'react-native';
 import metrics from '../../constants/layout';
 import colors from '../../constants/colors';
 import * as Typography from '../Atoms/Typography';
 import fonts from '../../constants/fontsSize';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { useMutation } from "react-query"
 import profielApi from '../../api/profile';
 import LungXinstance from '../../api/server';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../../context/AuthContext';
 
-const user = {
-  firstname: 'Pratyush',
-  lastname: 'Motha',
-  username: 'pratyushmotha',
-  email: 'ipratyushmotha@gmail.com',
-  phone: '7668532731',
-};
+const UserInfoCard = () => {
 
-const UserInfoCard = ({ profile }) => {
-
-  // const {mutation}=useMutation("/api/user_profile/",profielApi.patchProfile)
+  const { user, setUser, } = useContext(AuthContext);
+  const [profileImage, setProfileImage] = useState(user?.profile_picture)
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -32,37 +27,31 @@ const UserInfoCard = ({ profile }) => {
       quality: 1,
     });
     if (!result?.cancelled) {
-      // uri: Platform.OS === 'android' ? result.uri : result.uri.replace('file://', '')
       const profile = await FileSystem.readAsStringAsync(result.uri, { encoding: 'base64' });
-      // await LungXinstance.patch("api/user_profile/",{profile_picture:profile})
-      // console.log(profile)
-      // await axios.patch("https://lung.thedelvierypointe.com/api/user_profile/", { profile_picture: profile }, {
-      //   headers: {
-      //     "Accept": "application/json, text/plain, */*",
-      //     "Content-Type": "application/json",
-      //     "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA1MTI4MTg0LCJpYXQiOjE2ODk1NzYxODQsImp0aSI6IjgwNjY5YTAwZWYzODQyZjQ4MWY2NjNlOWMwNGJmMzM2IiwidXNlcl9pZCI6MTJ9.mDsM2i6GK733g7XLCTghjIaipWPuPlbtIx9BzX8M2X4"
-      //   },
-      // }).then(res => console.log("profile_picture....",res)).catch(err => console.log(err))
-
       try {
-        const response = await LungXinstance.patch('api/user_profile/', {
+        const res = await LungXinstance.patch('api/user_profile/', {
           profile_picture: profile,
         });
-        console.log("response....picture..", response)
+        if (res?.data) {
+          setProfileImage(res?.data?.profile_picture)
+          setUser({
+            ...user,
+            profile_picture: res?.data?.profile_picture,
+          })
+          await AsyncStorage.mergeItem(
+            'user',
+            JSON.stringify({
+              profile_picture: res?.data?.profile_picture,
+            }),
+          );
+          ToastAndroid.show('Profile Picture Updated', ToastAndroid.LONG);
+
+        }
       } catch (e) {
         console.log("Error.....In User Profile..", e)
       }
-      
-      // mutation({profile_picture:profile})
-      // UpdateProfile(profile, token)
-      // .then((response) => {
-      //     if (response?.status == 200) {
-      //         dispatch(setUser(response.data.data))
-      //         ToastAndroid.show("Profile Picture Updated Successfully", ToastAndroid.SHORT)
-      //     }
-      // })
-      // .catch((error) => {
-      // })
+
+
     }
   }
 
@@ -71,20 +60,25 @@ const UserInfoCard = ({ profile }) => {
   return (
     <View style={styles.AvatarContainer}>
       <Pressable onPress={pickImage}>
+        <View style={styles.iconImgView}>
+          <View style={styles.addIconImg}>
+            <MaterialIcons name="add" size={17} color={colors.green} />
+          </View>
+          {profileImage ?
+            <Image
+              style={styles.imgSize}
+              source={{
+                uri: 'https://lung.thedelvierypointe.com' + profileImage,
+              }}
+            />
+            :
+            <Image
+              style={styles.imgSize}
+              source={require("../../../assets/profile.jpg")}
+            />
+          }
 
-        {profile ?
-          <Image
-            style={{ width: 100, height: 100, borderRadius: 100 ,borderWidth:1,borderColor:"#E0E0E0" }}
-            source={{
-              uri: 'https://lung.thedelvierypointe.com' + profile,
-            }}
-          />
-          :
-          <Image
-            style={{ width: 100, height: 100,borderRadius: 100, borderWidth:1,borderColor:"#E0E0E0" }}
-            source={require("../../../assets/profile.jpg")}
-          />
-        }
+        </View>
       </Pressable>
       <View style={styles.InfoContainer}>
         <Typography.Title size={fonts.font16} color={colors.red}>
@@ -99,12 +93,21 @@ const UserInfoCard = ({ profile }) => {
 const styles = StyleSheet.create({
   AvatarContainer: {
     width: metrics.screenWidth,
-    marginTop: 20,
+    marginTop: 10,
     alignItems: 'center',
   },
   InfoContainer: {
     marginTop: 5,
   },
+  iconImgView: {
+    borderWidth: 1.5, borderColor: colors.green, borderRadius: 100, padding: 1
+  },
+  addIconImg: {
+    position: "absolute", backgroundColor: "#F6FBF9", padding: 1, zIndex: 9999, borderRadius: 50, borderColor: colors.green, borderWidth: 1.5, bottom: 4, right: 7,width:24, height:24, alignItems:"center", justifyContent:"center"
+  },
+  imgSize: {
+    width: 110, height: 110, borderRadius: 100,
+  }
 });
 
 export default UserInfoCard;
