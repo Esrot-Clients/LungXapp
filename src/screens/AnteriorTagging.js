@@ -202,7 +202,7 @@ export default function AnteriorTagging({ route, navigation }) {
       return (
         <Pressable disabled={!ele?.sound} style={listenRecordingsStyle.pressable} onPress={() => toggleSound(index)} key={(() => Math.random())()}>
           <Text>Position : {index}</Text>
-          {ele?.sound && <Text >{currentSoundId == index ? <Text>&#9654; stop</Text> : <Text>&#9654; play</Text>}</Text>}
+          {ele?.sound && <Text >{currentSoundId == index ? <Text>&#9632; stop</Text> : <Text>&#9654; play</Text>}</Text>}
         </Pressable>
       );
     });
@@ -368,8 +368,8 @@ export default function AnteriorTagging({ route, navigation }) {
         </View> */}
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 20 }}>
-          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
           <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
         </View>
 
         <View style={lungs.wrapper}>

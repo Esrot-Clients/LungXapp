@@ -141,7 +141,7 @@ export default function PosteriorTagging({ navigation, route }) {
       return (
         <Pressable disabled={!ele?.sound} style={listenRecordingsStyle.pressable} onPress={() => toggleSound(ele?.id)} key={(() => Math.random())()}>
           <Text>Position : {ele?.id}</Text>
-          {ele?.sound && <Text >{currentSoundId == ele.id ? <Text key={(() => Math.random())()}>&#9654; stop</Text> : <Text key={(() => Math.random())()}>&#9654; play</Text>}</Text>}
+          {ele?.sound && <Text >{currentSoundId == ele.id ? <Text key={(() => Math.random())()}>&#9632; stop</Text> : <Text key={(() => Math.random())()}>&#9654; play</Text>}</Text>}
         </Pressable>
       );
     });
@@ -457,8 +457,8 @@ export default function PosteriorTagging({ navigation, route }) {
         </View>
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 20 }}>
-          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
           <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+          <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
         </View>
 
         <View style={lungsPosterior.wrapper}>

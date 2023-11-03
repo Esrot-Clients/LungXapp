@@ -486,8 +486,8 @@ export default function ReportReceivedScreen({ navigation, route }) {
                 <SubTitle size={fonts.font12} >{' Anterior Recordings and Tags'}</SubTitle>
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 10 }}>
-                <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
                 <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
+                <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
               </View>
               <View style={lungs.wrapper}>
                 <View style={lungs.btn_wrapper}>
@@ -504,8 +504,8 @@ export default function ReportReceivedScreen({ navigation, route }) {
                 <SubTitle size={fonts.font12} >{' Posterior Recordings and Tags'}</SubTitle>
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15, marginTop: 10 }}>
-                <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
                 <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+                <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
               </View>
               <View style={lungs.wrapper}>
                 <View style={lungs.btn_wrapper}>

@@ -42,7 +42,7 @@ export const BtnContain = ({
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={onPress} disabled={disabled}>
-        <View style={[styles.Filled, { backgroundColor: disabled ? '#7BB274' : color }]}>
+        <View style={[styles.Filled, { backgroundColor: disabled ? colors.green : color }]}>
           {iconsize === 'small' ? (
             <View style={styles.Wrapper}>
               <Typography.SubTitle color={"white"} >{label}</Typography.SubTitle>

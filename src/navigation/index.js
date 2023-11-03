@@ -151,12 +151,12 @@ function TabNavigation() {
         tabBarLabelStyle: { fontSize: 12 },
       })}
     >
-      <Tab.Screen name="Home" 
+      <Tab.Screen name="Home"
         options={{
-        headerShown: false,
-       }}
-      component={HomeScreen} />
-      
+          headerShown: false,
+        }}
+        component={HomeScreen} />
+
       <Tab.Screen
         name="Patients list"
         component={PatientDetailsStack}
@@ -171,13 +171,15 @@ function TabNavigation() {
           headerShown: false,
         }}
       />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{
+        headerShown: false,
+      }} />
     </Tab.Navigator>
   );
 }
 
 function PatientListStack() {
-  
+
   return (
     <TopTab.Navigator
       screenOptions={{
@@ -204,7 +206,7 @@ function PatientListStack() {
 function PatientDetailsStack() {
   return (
     <Stack.Navigator>
-        <Stack.Screen
+      <Stack.Screen
         name="Patient list"
         component={PatientListStack}
         options={{
@@ -215,14 +217,15 @@ function PatientDetailsStack() {
               style={{
                 alignItems: 'center',
                 flexDirection: 'row',
-                marginRight: 30,
+                marginRight: 10,
+                // marginRight: 30,
               }}>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 onPress={() => {
                   // navigation.goBack();
                 }}>
                 <MaterialIcons name="arrow-back" size={25} color={colors.black} />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           ),
         }}

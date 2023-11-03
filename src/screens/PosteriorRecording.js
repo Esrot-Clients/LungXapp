@@ -392,7 +392,7 @@ export default function PosteriorRecording({ navigation, route }) {
                     <TouchableOpacity onPress={() => toggleSound(recordingLine.id)}
                       style={styles.state}
                     >
-                      <Text style={styles.recordingText}>{currentSoundId === recordingLine.id ? <Text>&#9654; Stop</Text> : <Text>&#9654; Play</Text>}</Text>
+                      <Text style={styles.recordingText}>{currentSoundId === recordingLine.id ? <Text>&#9632; Stop</Text> : <Text>&#9654; Play</Text>}</Text>
                     </TouchableOpacity>
                   }
 
@@ -429,8 +429,8 @@ export default function PosteriorRecording({ navigation, route }) {
       </View>
 
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, width: wp("80%"), marginBottom: -15 }}>
-        <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
         <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Left</Text>
+        <Text style={{ fontSize: 11, color: "#D22B2B", fontWeight: "700" }}>Right</Text>
       </View>
 
       <View style={lungsPosterior.wrapper}>
