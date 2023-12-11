@@ -70,7 +70,7 @@ export default function OutpatientListScreen({ navigation }) {
     var temp = dataFilter.filter(item => {
       return (
         item?.patient_code.toLowerCase().includes(search.toLowerCase()) ||
-        item?.patient_code.toLowerCase().includes(search.toLowerCase())
+        item?.patient_name.toLowerCase().includes(search.toLowerCase())
       );
     });
     setData(temp);
@@ -94,7 +94,7 @@ export default function OutpatientListScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
         data={data}
         renderItem={({ item }) => <PatientDetailsCard item={item} showView={true} onPress={() => navigation.navigate('Patient Details', { item: item })} onPressEdit={() =>{resetStateObj(); navigation.navigate('Add Patient', { existedPatientId: item.id, existedPatientHealthId: item.patienthealthdata?.[item.patienthealthdata?.length - 1].id })}} />}
-        // keyExtractor={item => item.toString()}
+        keyExtractor={(item,index) => index.toString()}
         // ListHeaderComponent={() => <SearchBar  handleFiltering={handleFiltering} />}
         ListFooterComponent={() =>
           <View style={{ marginVertical: 20, alignItems: 'center' }}>
