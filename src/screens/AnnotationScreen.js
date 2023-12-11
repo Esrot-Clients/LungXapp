@@ -79,7 +79,7 @@ export default function AnnotationScreen({ navigation }) {
     var temp = repotsListFilter.filter(item => {
       return (
         item?.patient?.patient_code.toLowerCase().includes(search.toLowerCase()) ||
-        item?.patient?.patient_code.toLowerCase().includes(search.toLowerCase())
+        item?.patient?.patient_name.toLowerCase().includes(search.toLowerCase())
       );
     });
     setReportsList(temp);
@@ -98,7 +98,8 @@ export default function AnnotationScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
         data={repotsList}
         renderItem={({ item }) => <ReportShareDataList item={item} onPress={() => handleMarkDataViewed(item.id)} />}
-        // keyExtractor={(item) => item.toString()}
+        keyExtractor={(item,index) => index.toString()}
+       
       />
 
     </View>

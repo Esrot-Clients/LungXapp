@@ -6,7 +6,7 @@ import metrics from '../../constants/layout';
 
 
 export default function SearchBar(
-    {placeholder = 'Search for Patient Id',handleFiltering ,handleDateFilter}
+    {placeholder = 'Search by Patient Id or Name',handleFiltering ,handleDateFilter}
 ) {
   return (
     <View
@@ -33,7 +33,7 @@ export default function SearchBar(
           style={styles.input}
           placeholder={placeholder}
           onChangeText={text => handleFiltering(text)}
-          keyboardType="numeric"
+          // keyboardType="numeric"
         />
       </View>
     </View>
