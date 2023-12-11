@@ -27,7 +27,7 @@ export const Textinput = ({
   multiline,
   editable,
   onChangeText,
-  onSubmitEditing, keyboardType
+  onSubmitEditing, keyboardType, autoCapitalize
 }) => {
 
 
@@ -58,7 +58,7 @@ export const Textinput = ({
         onSubmitEditing={handleSubmit}
         placeholder={placeholder}
         placeholderTextColor="gray"
-        autoCapitalize="none"
+        autoCapitalize={autoCapitalize? autoCapitalize: "none"}
         multiline={height ? true : false}
         keyboardType={keyboardType}
       />
