@@ -569,6 +569,7 @@ export default function AddPatientScreen({ route, navigation }) {
         label={"Patient Name"}
         onChangeText={setpatientname}
         value={patientname}
+        autoCapitalize="characters"
       />
 
       <Textinput
