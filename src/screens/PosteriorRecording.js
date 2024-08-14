@@ -228,6 +228,10 @@ export default function PosteriorRecording({ navigation, route }) {
           await Audio.setAudioModeAsync({
             allowsRecordingIOS: true,
             playsInSilentModeIOS: true,
+            staysActiveInBackground: true,
+            // interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+            playsInSilentLockedModeIOS: true,
+            // interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
           });
           // changing the button state from null to start recoding 
           btnState[id] = "recording"
@@ -237,13 +241,13 @@ export default function PosteriorRecording({ navigation, route }) {
           const options = {
             android: {
               ...android,
-              extension: '.mp3',
+              extension: '.wav',
               sampleRate: 8000,
               bitRate: 16000,
             },
             ios: {
               ...ios,
-              extension: '.mp3',
+              extension: '.wav',
               sampleRate: 8000,
               bitRate: 16000,
             },

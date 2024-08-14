@@ -83,7 +83,6 @@ export default function AnteriorRecording({ route, navigation }) {
       type: "audio/mp3"
     }
     payload.append(key, audioFile)
-
     try {
       if (newlyCreatedPatientLungsId == null) {
         payload.append("patient", newlyCreatedPatientId)
@@ -250,6 +249,10 @@ export default function AnteriorRecording({ route, navigation }) {
           await Audio.setAudioModeAsync({
             allowsRecordingIOS: true,
             playsInSilentModeIOS: true,
+            staysActiveInBackground: true,
+            // interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+            playsInSilentLockedModeIOS: true,
+            // interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
           });
           // changing the button state from null to start recoding 
           btnState[id] = "recording"
@@ -259,13 +262,13 @@ export default function AnteriorRecording({ route, navigation }) {
           const options = {
             android: {
               ...android,
-              extension: '.mp3',
+              extension: '.wav',
               sampleRate: 8000,
               bitRate: 16000,
             },
             ios: {
               ...ios,
-              extension: '.mp3',
+              extension: '.wav',
               sampleRate: 8000,
               bitRate: 16000,
             },
@@ -285,7 +288,7 @@ export default function AnteriorRecording({ route, navigation }) {
           setIsRecording(true)
           // saving recording 
           recordingRef.current = recording;
-
+          
           // check if id is valid or not 
           if (typeof id != "number") {
             setMessage("Recording started");
