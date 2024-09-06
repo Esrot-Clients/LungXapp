@@ -263,14 +263,14 @@ export default function AnteriorRecording({ route, navigation }) {
             android: {
               ...android,
               extension: '.wav',
-              sampleRate: 8000,
-              bitRate: 16000,
+              sampleRate: 44100,   // Set to 44.1 kHz for high quality
+              bitRate: 128000,     // Set to 128 kbps for higher audio quality
             },
             ios: {
               ...ios,
               extension: '.wav',
-              sampleRate: 8000,
-              bitRate: 16000,
+              sampleRate: 44100,   // Set to 44.1 kHz for high quality
+              bitRate: 128000,     // Set to 128 kbps for higher audio quality
             },
           };
           const { recording } = await Audio.Recording.createAsync(options);
