@@ -15,6 +15,7 @@ import LungXinstance from "../api/server";
 import { FontAwesome } from '@expo/vector-icons';
 import ProgressStep from "../components/Molecules/ProgressStep";
 import fonts from "../constants/fontsSize";
+import { AndroidAudioEncoder, AndroidOutputFormat, IOSAudioQuality, IOSOutputFormat } from "expo-av/build/Audio";
 
 
 export default function PosteriorRecording({ navigation, route }) {
@@ -240,16 +241,23 @@ export default function PosteriorRecording({ navigation, route }) {
           const { ios, android } = Audio.RecordingOptionsPresets.HIGH_QUALITY;
           const options = {
             android: {
-              ...android,
-              extension: '.wav',
-              sampleRate: 44100,   // Set to 44.1 kHz for high quality
-              bitRate: 128000,     // Set to 128 kbps for higher audio quality
+              extension: '.m4a',
+              outputFormat: AndroidOutputFormat.MPEG_4,
+              audioEncoder: AndroidAudioEncoder.AAC,
+              sampleRate: 44100,
+              numberOfChannels: 1,
+              bitRate: 128000,
             },
             ios: {
-              ...ios,
-              extension: '.wav',
-              sampleRate: 44100,   // Set to 44.1 kHz for high quality
-              bitRate: 128000,     // Set to 128 kbps for higher audio quality
+              extension: '.m4a',
+              outputFormat: IOSOutputFormat.MPEG4AAC,
+              audioQuality: IOSAudioQuality.MAX,
+              sampleRate: 44100,
+              numberOfChannels: 1,
+              bitRate: 128000,
+              linearPCMBitDepth: 16,
+              linearPCMIsBigEndian: false,
+              linearPCMIsFloat: false,
             },
           };
           const { recording } = await Audio.Recording.createAsync(options);
