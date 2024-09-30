@@ -107,7 +107,7 @@ export default function AnteriorRecording({ route, navigation }) {
     const audioFile = {
       uri: file,
       name: file,
-      type: "audio/mp3",
+      type: "audio/wav",
     };
     payload.append(key, audioFile);
     try {
@@ -278,20 +278,14 @@ export default function AnteriorRecording({ route, navigation }) {
           const { ios, android } = Audio.RecordingOptionsPresets.HIGH_QUALITY;
           const options = {
             android: {
-              extension: '.m4a',
+              extension: '.wav',
               outputFormat: AndroidOutputFormat.MPEG_4,
               audioEncoder: AndroidAudioEncoder.AAC,
-              sampleRate: 44100,
-              numberOfChannels: 1,
-              bitRate: 128000,
             },
             ios: {
-              extension: '.m4a',
+              extension: '.wav',
               outputFormat: IOSOutputFormat.MPEG4AAC,
               audioQuality: IOSAudioQuality.MAX,
-              sampleRate: 44100,
-              numberOfChannels: 1,
-              bitRate: 128000,
               linearPCMBitDepth: 16,
               linearPCMIsBigEndian: false,
               linearPCMIsFloat: false,
