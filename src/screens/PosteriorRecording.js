@@ -241,9 +241,13 @@ export default function PosteriorRecording({ navigation, route }) {
           const { ios, android } = Audio.RecordingOptionsPresets.HIGH_QUALITY;
           const options = {
             android: {
+              // extension: '.wav',
+              // outputFormat: AndroidOutputFormat.MPEG_4,
+              // audioEncoder: AndroidAudioEncoder.AAC,
               extension: '.wav',
-              outputFormat: AndroidOutputFormat.MPEG_4,
-              audioEncoder: AndroidAudioEncoder.AAC,
+              outputFormat: AndroidOutputFormat.PCM_16BIT, // Or appropriate format for raw PCM
+              audioEncoder: AndroidAudioEncoder.AAC, 
+              numberOfChannels: 1,
             },
             ios: {
               extension: '.wav',
