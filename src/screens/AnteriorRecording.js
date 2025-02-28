@@ -284,15 +284,20 @@ export default function AnteriorRecording({ route, navigation }) {
           const options = {
             android: {
               extension: ".wav",
-              // outputFormat: AndroidOutputFormat.PCM_16BIT, // Or appropriate format for raw PCM
-              outputFormat: AndroidOutputFormat.MPEG_4,
-              audioEncoder: AndroidAudioEncoder.AAC,
+              outputFormat: AndroidOutputFormat.PCM_32,
+              audioEncoder: AndroidAudioEncoder.AAC_ELD,
+              sampleRate: 48000,
               numberOfChannels: 1,
+              bitRate: 320000,
+              maxFileSize: 524288000,
             },
             ios: {
               extension: ".wav",
               outputFormat: IOSOutputFormat.MPEG4AAC,
               audioQuality: IOSAudioQuality.MAX,
+              sampleRate: 44100,
+              numberOfChannels: 1,
+              bitRate: 128000,
               linearPCMBitDepth: 16,
               linearPCMIsBigEndian: false,
               linearPCMIsFloat: false,

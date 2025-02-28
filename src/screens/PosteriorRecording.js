@@ -10,9 +10,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useState, useEffect, useRef, useContext } from "react";
-
-import testdel from "./../../assets/testdel.png";
-
 import * as button from "../components/Atoms/Button";
 import metrics from "../constants/layout";
 import colors from "../constants/colors";
@@ -20,7 +17,6 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-
 import { Audio } from "expo-av";
 import {
   AddPatientContext,
@@ -30,7 +26,6 @@ import { AuthContext } from "../context/AuthContext";
 import LungXinstance from "../api/server";
 import { FontAwesome } from "@expo/vector-icons";
 import ProgressStep from "../components/Molecules/ProgressStep";
-import fonts from "../constants/fontsSize";
 import {
   AndroidAudioEncoder,
   AndroidOutputFormat,
@@ -267,16 +262,35 @@ export default function PosteriorRecording({ navigation, route }) {
           const { ios, android } = Audio.RecordingOptionsPresets.HIGH_QUALITY;
           const options = {
             android: {
-              extension: ".wav",
+              // extension: ".wav",
               // outputFormat: AndroidOutputFormat.PCM_16BIT, // Or appropriate format for raw PCM
-              outputFormat: AndroidOutputFormat.MPEG_4,
-              audioEncoder: AndroidAudioEncoder.AAC,
+              // // outputFormat: AndroidOutputFormat.MPEG_4,
+              // audioEncoder: AndroidAudioEncoder.AAC,
+              // numberOfChannels: 1,
+
+              // extension: ".wav",
+              // outputFormat: AndroidOutputFormat.PCM_16BIT,
+              // audioEncoder: AndroidAudioEncoder.AAC,
+              // numberOfChannels: 1,
+              // sampleRate: 48000, // Higher sample rate
+              // bitRate: 1024000, // Very high bitrate (1 Mbps)
+              // samples: 910080, // Double the sample count to increase duration
+
+              extension: ".wav",
+              outputFormat: AndroidOutputFormat.PCM_32,
+              audioEncoder: AndroidAudioEncoder.AAC_ELD,
+              sampleRate: 48000,
               numberOfChannels: 1,
+              bitRate: 320000,
+              maxFileSize: 524288000,
             },
             ios: {
               extension: ".wav",
               outputFormat: IOSOutputFormat.MPEG4AAC,
               audioQuality: IOSAudioQuality.MAX,
+              sampleRate: 44100,
+              numberOfChannels: 1,
+              bitRate: 128000,
               linearPCMBitDepth: 16,
               linearPCMIsBigEndian: false,
               linearPCMIsFloat: false,
