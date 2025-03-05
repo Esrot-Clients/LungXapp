@@ -273,7 +273,7 @@ export default function AnteriorRecording({ route, navigation }) {
           // changing the button state from null to start recoding
           btnState[id] = "recording";
           setBtnState(btnState);
-         
+
           const recording = await startRecording({
             sampleRate: 48000,
             channels: 1,
@@ -283,9 +283,6 @@ export default function AnteriorRecording({ route, navigation }) {
             compression: null,
           });
 
-          const timerInterval = setInterval(() => {
-            setRecordingTime((prevTime) => prevTime - 1);
-          }, 1000);
           // set Portion On Focus for the display of true  re-recording section
           setPortionOnFocus(id);
           setIsFoucued(true);
@@ -299,6 +296,11 @@ export default function AnteriorRecording({ route, navigation }) {
           } else {
             setRecordText(`Re-recording audio ${id}...`);
           }
+
+          const timerInterval = setInterval(() => {
+            setRecordingTime((prevTime) => prevTime - 1);
+          }, 1000);
+
           //using stopRecording function saving it to the recordings state
           setRecordingTimeout(
             setTimeout(() => {

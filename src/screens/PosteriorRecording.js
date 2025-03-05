@@ -264,9 +264,6 @@ export default function PosteriorRecording({ navigation, route }) {
             compression: null,
           });
 
-          const timerInterval = setInterval(() => {
-            setRecordingTime((prevTime) => prevTime - 1);
-          }, 1000);
           // set Portion On Focus for the display of true  re-recording section
           setPortionOnFocus(id);
           setIsRecording(true);
@@ -279,6 +276,11 @@ export default function PosteriorRecording({ navigation, route }) {
           } else {
             setRecordText(`Re-recording audio ${id}...`);
           }
+          
+          const timerInterval = setInterval(() => {
+            setRecordingTime((prevTime) => prevTime - 1);
+          }, 1000);
+
           setRecordingTimeout(
             setTimeout(() => {
               ToastAndroid.showWithGravityAndOffset(
