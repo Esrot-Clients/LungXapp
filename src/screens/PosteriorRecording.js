@@ -26,14 +26,10 @@ import { AuthContext } from "../context/AuthContext";
 import LungXinstance from "../api/server";
 import { FontAwesome } from "@expo/vector-icons";
 import ProgressStep from "../components/Molecules/ProgressStep";
-import {
-  AndroidAudioEncoder,
-  AndroidOutputFormat,
-  IOSAudioQuality,
-  IOSOutputFormat,
-} from "expo-av/build/Audio";
+import { useAudioRecorder } from "@siteed/expo-audio-stream";
 
 export default function PosteriorRecording({ navigation, route }) {
+  const { startRecording, stopRecording } = useAudioRecorder({ debug: true });
   const EditPosteriorRecTag = route?.params?.EditPosteriorRecTag;
   const orientations = ["vertical", "horizontal"];
   const [currrentStep, setCurrentStep] = useState(1);
@@ -225,7 +221,7 @@ export default function PosteriorRecording({ navigation, route }) {
     btnState[id] = "recording";
   }
 
-  async function startRecording(id, count, setCount, reRec) {
+  async function handleStartRecording(id, count, setCount, reRec) {
     if (portionOnFocus != id && portionOnFocus != null) {
       setCount(2);
       setPortionOnFocus(id);
@@ -259,48 +255,15 @@ export default function PosteriorRecording({ navigation, route }) {
           btnState[id] = "recording";
           setBtnState(btnState);
 
-          const { ios, android } = Audio.RecordingOptionsPresets.HIGH_QUALITY;
-          const options = {
-            android: {
-              // extension: ".wav",
-              // outputFormat: AndroidOutputFormat.PCM_16BIT, // Or appropriate format for raw PCM
-              // // outputFormat: AndroidOutputFormat.MPEG_4,
-              // audioEncoder: AndroidAudioEncoder.AAC,
-              // numberOfChannels: 1,
+          const recording = await startRecording({
+            sampleRate: 48000,
+            channels: 1,
+            encoding: "pcm_32bit",
+            bitDepth: 32,
+            interval: 10000,
+            compression: null,
+          });
 
-              // extension: ".wav",
-              // outputFormat: AndroidOutputFormat.PCM_16BIT,
-              // audioEncoder: AndroidAudioEncoder.AAC,
-              // numberOfChannels: 1,
-              // sampleRate: 48000, // Higher sample rate
-              // bitRate: 1024000, // Very high bitrate (1 Mbps)
-              // samples: 910080, // Double the sample count to increase duration
-
-              extension: ".wav",
-              outputFormat: AndroidOutputFormat.PCM_32,
-              audioEncoder: AndroidAudioEncoder.AAC_ELD,
-              sampleRate: 48000,
-              numberOfChannels: 1,
-              bitRate: 320000,
-              maxFileSize: 524288000,
-            },
-            ios: {
-              extension: ".wav",
-              outputFormat: IOSOutputFormat.MPEG4AAC,
-              audioQuality: IOSAudioQuality.MAX,
-              sampleRate: 44100,
-              numberOfChannels: 1,
-              bitRate: 128000,
-              linearPCMBitDepth: 16,
-              linearPCMIsBigEndian: false,
-              linearPCMIsFloat: false,
-            },
-          };
-          const { recording } = await Audio.Recording.createAsync(options);
-
-          // const { recording } = await Audio.Recording.createAsync(
-          //   Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-          // );
           const timerInterval = setInterval(() => {
             setRecordingTime((prevTime) => prevTime - 1);
           }, 1000);
@@ -328,7 +291,7 @@ export default function PosteriorRecording({ navigation, route }) {
               clearInterval(timerInterval);
               setRecordingTime(10);
               setIsRecording(false);
-              stopRecording(id);
+              handleStopRecording(id);
               if (reRec != "re-record") {
                 setCount(0);
               }
@@ -343,7 +306,7 @@ export default function PosteriorRecording({ navigation, route }) {
     }
   }
 
-  async function stopRecording(id) {
+  async function handleStopRecording(id) {
     const recording = recordingRef.current;
     recordingRef.current = null;
 
@@ -351,10 +314,9 @@ export default function PosteriorRecording({ navigation, route }) {
       clearTimeout(recordingTimeout);
 
       try {
-        await recording.stopAndUnloadAsync();
-
-        const { sound, status } = await recording.createNewLoadedSoundAsync();
-        var file = recording.getURI();
+        const uri = await stopRecording();
+        console.log("uri....", uri);
+        var file = uri?.fileUri;
         var recKey = recordingsPosterior[id - 7].key;
         if (typeof id != "number") {
           await handlePatientPosteriorRecordingsNew(recKey, file);
@@ -365,14 +327,6 @@ export default function PosteriorRecording({ navigation, route }) {
         console.error("Failed to stop recording", err);
       }
     }
-  }
-
-  function getDurationFormatted(millis) {
-    const minutes = millis / 1000 / 60;
-    const minutesDisplay = Math.floor(minutes);
-    const seconds = Math.round((minutes - minutesDisplay) * 60);
-    const secondsDisplay = seconds < 10 ? `0${seconds}` : seconds;
-    return `${minutesDisplay}:${secondsDisplay}`;
   }
 
   function getRecordingLines() {
@@ -391,7 +345,7 @@ export default function PosteriorRecording({ navigation, route }) {
                 style={[recordingLine.style, styles.button_wrapper]}
                 onPress={() => {
                   !isRecording
-                    ? startRecording(recordingLine.id, count, setCount)
+                    ? handleStartRecording(recordingLine.id, count, setCount)
                     : ToastAndroid.showWithGravityAndOffset(
                         "Recording not completed. Hang in there!",
                         ToastAndroid.SHORT,
@@ -516,7 +470,9 @@ export default function PosteriorRecording({ navigation, route }) {
             isPlaying ||
             !btnState[portionOnFocus]
           }
-          onPress={() => startRecording(portionOnFocus, 1, "", "re-record")}
+          onPress={() =>
+            handleStartRecording(portionOnFocus, 1, "", "re-record")
+          }
         >
           <Text
             style={

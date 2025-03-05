@@ -11,9 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#fff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "buildNumber": "1.0",
@@ -49,7 +47,8 @@
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
         }
       ],
-      "expo-font"
+      "expo-font",
+      ["@siteed/expo-audio-stream"]
     ],
     "extra": {
       "eas": {

@@ -27,19 +27,13 @@ import { AddPatientContext } from "../context/AddPatientContext";
 import * as Sharing from "expo-sharing";
 import LungXinstance from "../api/server";
 import { AuthContext } from "../context/AuthContext";
-import axios from "axios";
-import * as ExpoFileSystem from "expo-file-system";
 import LoadingScreen from "../components/Atoms/LoadingScreen";
 import { FontAwesome } from "@expo/vector-icons";
 import ProgressStep from "../components/Molecules/ProgressStep";
-import {
-  AndroidAudioEncoder,
-  AndroidOutputFormat,
-  IOSAudioQuality,
-  IOSOutputFormat,
-} from "expo-av/build/Audio";
+import { useAudioRecorder } from "@siteed/expo-audio-stream";
 
 export default function AnteriorRecording({ route, navigation }) {
+  const { startRecording, stopRecording } = useAudioRecorder({ debug: true });
   const EditAnteriorRecTag = route?.params?.EditAnteriorRecTag;
   const orientations = ["vertical", "horizontal"];
   const [currrentStep, setCurrentStep] = useState(0);
@@ -247,7 +241,7 @@ export default function AnteriorRecording({ route, navigation }) {
     btnState[id] = "recording";
   }
 
-  async function startRecording(id, count, setCount, reRec) {
+  async function handleStartRecording(id, count, setCount, reRec) {
     if (portionOnFocus != id && portionOnFocus != null) {
       setCount(2);
       setPortionOnFocus(id);
@@ -279,35 +273,15 @@ export default function AnteriorRecording({ route, navigation }) {
           // changing the button state from null to start recoding
           btnState[id] = "recording";
           setBtnState(btnState);
-
-          const { ios, android } = Audio.RecordingOptionsPresets.HIGH_QUALITY;
-          const options = {
-            android: {
-              extension: ".wav",
-              outputFormat: AndroidOutputFormat.PCM_32,
-              audioEncoder: AndroidAudioEncoder.AAC_ELD,
-              sampleRate: 48000,
-              numberOfChannels: 1,
-              bitRate: 320000,
-              maxFileSize: 524288000,
-            },
-            ios: {
-              extension: ".wav",
-              outputFormat: IOSOutputFormat.MPEG4AAC,
-              audioQuality: IOSAudioQuality.MAX,
-              sampleRate: 44100,
-              numberOfChannels: 1,
-              bitRate: 128000,
-              linearPCMBitDepth: 16,
-              linearPCMIsBigEndian: false,
-              linearPCMIsFloat: false,
-            },
-          };
-          const { recording } = await Audio.Recording.createAsync(options);
-
-          // const { recording } = await Audio.Recording.createAsync(
-          //   Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-          // );
+         
+          const recording = await startRecording({
+            sampleRate: 48000,
+            channels: 1,
+            encoding: "pcm_32bit",
+            bitDepth: 32,
+            interval: 10000,
+            compression: null,
+          });
 
           const timerInterval = setInterval(() => {
             setRecordingTime((prevTime) => prevTime - 1);
@@ -338,7 +312,7 @@ export default function AnteriorRecording({ route, navigation }) {
               clearInterval(timerInterval);
               setRecordingTime(10);
               setIsRecording(false);
-              stopRecording(id);
+              handleStopRecording(id);
 
               if (reRec != "re-record") {
                 setCount(0);
@@ -354,7 +328,7 @@ export default function AnteriorRecording({ route, navigation }) {
     }
   }
 
-  async function stopRecording(id) {
+  async function handleStopRecording(id) {
     const recording = recordingRef.current;
     recordingRef.current = null;
 
@@ -362,10 +336,8 @@ export default function AnteriorRecording({ route, navigation }) {
       clearTimeout(recordingTimeout);
 
       try {
-        await recording.stopAndUnloadAsync();
-
-        const { sound, status } = await recording.createNewLoadedSoundAsync();
-        var file = recording.getURI();
+        const uri = await stopRecording();
+        var file = uri?.fileUri;
         var recKey = recordings[id].key;
 
         if (typeof id != "number") {
@@ -377,14 +349,6 @@ export default function AnteriorRecording({ route, navigation }) {
         console.error("Failed to stop recording", err);
       }
     }
-  }
-
-  function getDurationFormatted(millis) {
-    const minutes = millis / 1000 / 60;
-    const minutesDisplay = Math.floor(minutes);
-    const seconds = Math.round((minutes - minutesDisplay) * 60);
-    const secondsDisplay = seconds < 10 ? `0${seconds}` : seconds;
-    return `${minutesDisplay}:${secondsDisplay}`;
   }
 
   function getRecordingLines() {
@@ -403,7 +367,7 @@ export default function AnteriorRecording({ route, navigation }) {
                 style={[styles.button_wrapper, recordingLine.style]}
                 onPress={() => {
                   !isRecording
-                    ? startRecording(recordingLine.id, count, setCount)
+                    ? handleStartRecording(recordingLine.id, count, setCount)
                     : ToastAndroid.showWithGravityAndOffset(
                         "Recording not completed. Hang in there!",
                         ToastAndroid.SHORT,
@@ -527,7 +491,9 @@ export default function AnteriorRecording({ route, navigation }) {
           disabled={
             isRecording || !isFoucued || isPlaying || !btnState[portionOnFocus]
           }
-          onPress={() => startRecording(portionOnFocus, 1, "", "re-record")}
+          onPress={() =>
+            handleStartRecording(portionOnFocus, 1, "", "re-record")
+          }
         >
           <Text
             style={
